@@ -52,19 +52,22 @@ const Calendar = (() => {
     return `<h3>${d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}</h3>${dayTasks.length === 0 ? '<div class="upcoming-empty">No tasks due</div>' : dayTasks.map(t => `<div class="calendar-task-item"><span class="calendar-task-dot" style="background:${t.priority==='high'?'var(--priority-high)':t.priority==='medium'?'var(--priority-medium)':'var(--priority-low)'}"></span><span class="calendar-task-info">${t.title} <span class="badge badge-${t.priority||'medium'}">${Utils.capitalize(t.priority||'medium')}</span>${t.completed ? ' <span class="badge badge-completed">Done</span>' : ''}</span></div>`).join('')}`;
   }
 
+  function handleDayClick(e) {
+    const dayEl = e.target.closest('.calendar-day'); if (!dayEl) return;
+    selectedDate = dayEl.dataset.date;
+    const tasks = Storage.getTasks().filter(t => t.dueDate);
+    document.getElementById('calendarTasks').innerHTML = renderDateTasks(selectedDate, tasks);
+    document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+    dayEl.classList.add('selected');
+  }
+
   function bindEvents() {
     document.getElementById('prevMonth')?.addEventListener('click', () => { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } selectedDate = null; render(); });
     document.getElementById('nextMonth')?.addEventListener('click', () => { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } selectedDate = null; render(); });
     const container = document.getElementById('page-calendar');
     if (!container) return;
-    container.addEventListener('click', e => {
-      const dayEl = e.target.closest('.calendar-day'); if (!dayEl) return;
-      selectedDate = dayEl.dataset.date;
-      const tasks = Storage.getTasks().filter(t => t.dueDate);
-      document.getElementById('calendarTasks').innerHTML = renderDateTasks(selectedDate, tasks);
-      document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
-      dayEl.classList.add('selected');
-    });
+    container.removeEventListener('click', handleDayClick);
+    container.addEventListener('click', handleDayClick);
   }
 
   return { init, render };

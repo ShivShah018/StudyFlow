@@ -32,22 +32,29 @@ const Dashboard = (() => {
     bindEvents();
   }
 
+  function handleQuickAction(e) {
+    const btn = e.target.closest('[data-action]'); if (!btn) return;
+    const a = btn.dataset.action;
+    if (a === 'addTask') TaskManager.showTaskModal();
+    else if (a === 'goToTasks') App.navigate('tasks');
+    else if (a === 'goToPomodoro') App.navigate('pomodoro');
+    else if (a === 'goToPlanner') App.navigate('planner');
+    else if (a === 'goToCalendar') App.navigate('calendar');
+  }
+
+  function handleRecentCheck(e) {
+    const check = e.target.closest('.recent-task-check'); if (!check) return;
+    Storage.toggleTaskComplete(check.dataset.id); render(); TaskManager.renderPage(); Calendar.render();
+    if (typeof StudyPlanner !== 'undefined') StudyPlanner.generateSchedule();
+  }
+
   function bindEvents() {
     const container = document.getElementById('page-dashboard');
     if (!container) return;
-    container.addEventListener('click', e => {
-      const btn = e.target.closest('[data-action]'); if (!btn) return;
-      const a = btn.dataset.action;
-      if (a === 'addTask') TaskManager.showTaskModal();
-      else if (a === 'goToTasks') App.navigate('tasks');
-      else if (a === 'goToPomodoro') App.navigate('pomodoro');
-      else if (a === 'goToPlanner') App.navigate('planner');
-      else if (a === 'goToCalendar') App.navigate('calendar');
-    });
-    container.addEventListener('click', e => {
-      const check = e.target.closest('.recent-task-check'); if (!check) return;
-      Storage.toggleTaskComplete(check.dataset.id); render(); TaskManager.renderPage(); Calendar.render();
-    });
+    container.removeEventListener('click', handleQuickAction);
+    container.removeEventListener('click', handleRecentCheck);
+    container.addEventListener('click', handleQuickAction);
+    container.addEventListener('click', handleRecentCheck);
   }
 
   return { init, render };

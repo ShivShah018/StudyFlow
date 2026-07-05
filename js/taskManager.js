@@ -26,7 +26,7 @@ const TaskManager = (() => {
     const stats = getStats();
     const categories = getCategories();
     container.innerHTML = `
-      <div class="tasks-header"><h2>Task Manager</h2><div class="tasks-header-actions"><button class="btn btn-primary" id="addTaskBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Task</button></div></div>
+      <div class="tasks-header"><h2>Task Manager</h2><div class="tasks-header-actions"><button class="btn btn-primary" id="addTaskBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Task</button>${stats.completed > 0 ? `<button class="btn btn-secondary btn-danger" id="clearCompletedBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Clear Completed</button>` : ''}</div></div>
       <div class="tasks-filters">
         <div class="filter-group"><span class="filter-label">Search</span><input type="text" id="taskSearch" placeholder="Search tasks..." value="${currentFilter.search}" /></div>
         <div class="filter-group"><span class="filter-label">Priority</span><select id="filterPriority"><option value="">All</option><option value="high" ${currentFilter.priority==='high'?'selected':''}>High</option><option value="medium" ${currentFilter.priority==='medium'?'selected':''}>Medium</option><option value="low" ${currentFilter.priority==='low'?'selected':''}>Low</option></select></div>
@@ -94,12 +94,24 @@ const TaskManager = (() => {
     const container = document.getElementById('page-tasks');
     if (!container) return;
     document.getElementById('addTaskBtn')?.addEventListener('click', () => showTaskModal());
+    document.getElementById('clearCompletedBtn')?.addEventListener('click', clearCompleted);
     document.getElementById('taskSearch')?.addEventListener('input', Utils.debounce(e => { currentFilter.search = e.target.value; renderPage(); }, 300));
     document.getElementById('filterPriority')?.addEventListener('change', e => { currentFilter.priority = e.target.value; renderPage(); });
     document.getElementById('filterCategory')?.addEventListener('change', e => { currentFilter.category = e.target.value; renderPage(); });
     document.getElementById('sortTasks')?.addEventListener('change', e => { currentFilter.sort = e.target.value; renderPage(); });
     container.removeEventListener('click', handleTaskClick);
     container.addEventListener('click', handleTaskClick);
+  }
+
+  function clearCompleted() {
+    const tasks = Storage.getTasks();
+    const completed = tasks.filter(t => t.completed);
+    if (completed.length === 0) return;
+    if (!confirm('Delete all ' + completed.length + ' completed task' + (completed.length > 1 ? 's' : '') + '?')) return;
+    completed.forEach(t => Storage.deleteTask(t.id));
+    Utils.showToast('Cleared ' + completed.length + ' completed task' + (completed.length > 1 ? 's' : ''), 'success');
+    renderPage();
+    if (typeof Dashboard !== 'undefined') Dashboard.render();
   }
 
   function setGlobalSearch(q) { currentFilter.search = q; }

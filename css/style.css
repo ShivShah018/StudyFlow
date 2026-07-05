@@ -85,6 +85,8 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; back
 .btn-icon { width: 36px; height: 36px; padding: 0; border-radius: var(--radius-sm); }
 .btn-success { background: var(--success); color: #ffffff; }
 .btn-success:hover { background: #059669; }
+.btn-danger { background: var(--danger); color: #ffffff; }
+.btn-danger:hover { background: #dc2626; }
 
 .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); transition: box-shadow var(--transition), transform var(--transition); }
 .card:hover { box-shadow: var(--shadow-md); }

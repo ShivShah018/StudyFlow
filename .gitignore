@@ -3,3 +3,7 @@ node_modules/
 Thumbs.db
 *.log
 .env
+.vscode/
+.idea/
+*.swp
+*.swo

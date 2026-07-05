@@ -48,6 +48,15 @@ const TaskManager = (() => {
 
   function getCategories() { const t = Storage.getTasks(); const s = new Set(DEFAULT_CATEGORIES); t.forEach(x => { if (x.category) s.add(x.category); }); return Array.from(s); }
 
+  function refreshRelatedViews() {
+    if (typeof Dashboard !== 'undefined') Dashboard.render();
+    if (typeof Calendar !== 'undefined') Calendar.render();
+    if (typeof StudyPlanner !== 'undefined') {
+      StudyPlanner.generateSchedule();
+      if (document.getElementById('page-planner')?.classList.contains('active')) StudyPlanner.render();
+    }
+  }
+
   function showTaskModal(task = null) {
     const isEdit = task !== null;
     const categories = getCategories();
@@ -65,7 +74,7 @@ const TaskManager = (() => {
       const est = document.getElementById('taskEstDuration').value;
       const data = { title, description: document.getElementById('taskDesc').value.trim(), subject: document.getElementById('taskSubject').value.trim(), priority: document.getElementById('taskPriority').value, category: document.getElementById('taskCategory').value, estimatedDuration: est ? parseInt(est) : null, dueDate: document.getElementById('taskDueDate').value || null };
       if (isEdit) { Storage.updateTask(task.id, data); Utils.showToast('Task updated', 'success'); } else { data.id = Utils.generateId(); data.completed = false; data.createdAt = new Date().toISOString(); data.completedAt = null; Storage.addTask(data); Utils.showToast('Task added', 'success'); }
-      overlay.remove(); renderPage(); if (typeof Dashboard !== 'undefined') Dashboard.render(); if (typeof Calendar !== 'undefined') Calendar.render(); if (typeof StudyPlanner !== 'undefined') { StudyPlanner.generateSchedule(); if (document.getElementById('page-planner')?.classList.contains('active')) StudyPlanner.render(); }
+      overlay.remove(); renderPage(); refreshRelatedViews();
     });
   }
 
@@ -78,9 +87,9 @@ const TaskManager = (() => {
     document.getElementById('filterCategory')?.addEventListener('change', e => { currentFilter.category = e.target.value; renderPage(); });
     document.getElementById('sortTasks')?.addEventListener('change', e => { currentFilter.sort = e.target.value; renderPage(); });
     container.addEventListener('click', e => {
-      const cb = e.target.closest('.task-checkbox'); if (cb) { const id = cb.dataset.id; Storage.toggleTaskComplete(id); renderPage(); Dashboard.render(); Calendar.render(); if (typeof StudyPlanner !== 'undefined') { StudyPlanner.generateSchedule(); if (document.getElementById('page-planner')?.classList.contains('active')) StudyPlanner.render(); } return; }
+      const cb = e.target.closest('.task-checkbox'); if (cb) { const id = cb.dataset.id; Storage.toggleTaskComplete(id); renderPage(); refreshRelatedViews(); return; }
       const eb = e.target.closest('.edit-btn'); if (eb) { const tasks = Storage.getTasks(); const t = tasks.find(x => x.id === eb.dataset.id); if (t) showTaskModal(t); return; }
-      const db = e.target.closest('.delete-btn'); if (db) { if (confirm('Delete this task?')) { Storage.deleteTask(db.dataset.id); Utils.showToast('Task deleted', 'error'); renderPage(); Dashboard.render(); Calendar.render(); if (typeof StudyPlanner !== 'undefined') { StudyPlanner.generateSchedule(); if (document.getElementById('page-planner')?.classList.contains('active')) StudyPlanner.render(); } } return; }
+      const db = e.target.closest('.delete-btn'); if (db) { if (confirm('Delete this task?')) { Storage.deleteTask(db.dataset.id); Utils.showToast('Task deleted', 'error'); renderPage(); refreshRelatedViews(); } return; }
     });
   }
 

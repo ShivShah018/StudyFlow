@@ -122,7 +122,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; back
 .toast-error { background: var(--danger); }
 .toast-info { background: var(--accent); }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
 .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }

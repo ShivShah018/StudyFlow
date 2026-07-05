@@ -7,7 +7,6 @@ const Storage = (() => {
   function toggleTaskComplete(id) { const t = getTasks(); const task = t.find(x => x.id === id); if (!task) return null; task.completed = !task.completed; task.completedAt = task.completed ? new Date().toISOString() : null; saveTasks(t); return task; }
   function getPlannerSchedule() { try { const d = localStorage.getItem('studyflow_planner_schedule'); return d ? JSON.parse(d) : null; } catch { return null; } }
   function savePlannerSchedule(s) { localStorage.setItem('studyflow_planner_schedule', JSON.stringify(s)); }
-  function getPlannerCompletedDates() { try { const d = localStorage.getItem('studyflow_planner_completed_dates'); return d ? JSON.parse(d) : []; } catch { return []; } }
   function savePlannerCompletedDates(d) { localStorage.setItem('studyflow_planner_completed_dates', JSON.stringify(d)); }
-  return { getTasks, saveTasks, addTask, updateTask, deleteTask, toggleTaskComplete, getPlannerSchedule, savePlannerSchedule, getPlannerCompletedDates, savePlannerCompletedDates };
+  return { getTasks, addTask, updateTask, deleteTask, toggleTaskComplete, getPlannerSchedule, savePlannerSchedule, savePlannerCompletedDates };
 })();

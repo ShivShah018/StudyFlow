@@ -18,16 +18,14 @@ const Pomodoro = (() => {
       document.getElementById('pomodoroResumeBtn').onclick = resumeTimer;
       document.getElementById('pomodoroResetBtn').onclick = resetTimer;
 
-      document.getElementById('pTotalDec').onclick = function () { adjustValue('total', -1); };
-      document.getElementById('pTotalInc').onclick = function () { adjustValue('total', 1); };
-      document.getElementById('pFocusDec').onclick = function () { adjustValue('focus', -1); };
-      document.getElementById('pFocusInc').onclick = function () { adjustValue('focus', 1); };
-      document.getElementById('pBreakDec').onclick = function () { adjustValue('break', -1); };
-      document.getElementById('pBreakInc').onclick = function () { adjustValue('break', 1); };
+      ['Total', 'Focus', 'Break'].forEach(name => {
+        const field = name.toLowerCase();
+        document.getElementById(`p${name}Dec`).onclick = () => adjustValue(field, -1);
+        document.getElementById(`p${name}Inc`).onclick = () => adjustValue(field, 1);
+      });
 
       updateDisplay();
     } catch (e) {
-      console.error('Pomodoro init error:', e);
       document.getElementById('pomodoroDisplay').textContent = 'ERR';
       document.getElementById('pomodoroPhase').textContent = 'Init failed, check console';
     }

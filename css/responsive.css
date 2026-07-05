@@ -1,5 +1,5 @@
 @media (max-width: 1024px) {
-  .dashboard-bottom, .planner-grid-2 { grid-template-columns: 1fr; }
+  .dashboard-bottom { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
 }

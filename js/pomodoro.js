@@ -114,7 +114,7 @@ const Pomodoro = (() => {
     const b = document.getElementById('pBreak');
     if (t) { const v = parseInt(t.value); if (!isNaN(v) && v > 0 && v <= 480) totalMinutes = v; else t.value = totalMinutes; }
     if (f) { const v = parseInt(f.value); if (!isNaN(v) && v > 0 && v <= 120) { if (v > totalMinutes) { Utils.showToast('Focus cannot exceed total study time', 'error'); f.value = focusMinutes; } else { focusMinutes = v; } } else f.value = focusMinutes; }
-    if (b) { const v = parseInt(b.value); if (!isNaN(v) && v > 0 && v <= 60) breakMinutes = v; else b.value = breakMinutes; }
+    if (b) { const v = parseInt(b.value); if (!isNaN(v) && v > 0 && v <= 60) { if (v > focusMinutes) { Utils.showToast('Break cannot exceed focus time', 'error'); b.value = breakMinutes; } else { breakMinutes = v; } } else b.value = breakMinutes; }
     focusSeconds = focusMinutes * 60; breakSeconds = breakMinutes * 60;
     if (!isRunning) { timeLeft = focusSeconds; elapsedSeconds = 0; isFocus = true; cycleCount = 0; }
     saveSettings();
@@ -235,6 +235,7 @@ const Pomodoro = (() => {
     let v = parseInt(input.value) || 0;
     v += delta;
     if (field === 'focus' && v > totalMinutes) { Utils.showToast('Focus cannot exceed total study time', 'error'); return; }
+    if (field === 'break' && v > focusMinutes) { Utils.showToast('Break cannot exceed focus time', 'error'); return; }
     const max = field === 'total' ? 480 : field === 'focus' ? 120 : 60;
     if (v < 1) v = 1; if (v > max) v = max;
     input.value = v;

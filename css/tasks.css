@@ -13,10 +13,11 @@
 .tasks-list { display: flex; flex-direction: column; gap: 8px; }
 .task-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); transition: all var(--transition); cursor: pointer; }
 .task-item:hover { box-shadow: var(--shadow-md); border-color: var(--accent); }
-.task-item.completed { opacity: 0.7; }
+.task-item.completed { box-shadow: inset 3px 0 0 0 #eab308, var(--shadow-sm); background: linear-gradient(to right, rgba(234,179,8,0.04), transparent); }
 .task-item.completed .task-title-text { text-decoration: line-through; color: var(--text-secondary); }
-.task-item.ongoing { box-shadow: inset 3px 0 0 0 #eab308, var(--shadow-sm); background: linear-gradient(to right, rgba(234,179,8,0.04), transparent); }
-.task-item.ongoing:hover { box-shadow: inset 3px 0 0 0 #eab308, var(--shadow-md); }
+.task-item.completed:hover { box-shadow: inset 3px 0 0 0 #eab308, var(--shadow-md); }
+.task-item.ongoing { box-shadow: inset 3px 0 0 0 #22c55e, var(--shadow-sm); background: linear-gradient(to right, rgba(34,197,94,0.04), transparent); }
+.task-item.ongoing:hover { box-shadow: inset 3px 0 0 0 #22c55e, var(--shadow-md); }
 .task-checkbox { width: 22px; height: 22px; border: 2px solid var(--border-color); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--transition); }
 .task-checkbox:hover { border-color: var(--accent); }
 .task-checkbox.checked { background: var(--success); border-color: var(--success); }

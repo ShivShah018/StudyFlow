@@ -73,14 +73,14 @@ Students juggle multiple courses, assignment deadlines, exam preparation, and st
 
 | # | Screenshot | Caption |
 |---|------------|---------|
-| 1 | ![Dashboard](docs/screenshots/dashboard.png) | **Dashboard** — Welcome greeting, 4 stat cards (Total, Completed, Pending, Productivity %), quick-actions grid, recent tasks, and SVG productivity ring |
-| 2 | ![Tasks](docs/screenshots/tasks.png) | **Task Manager** — Filter bar (search, priority, category, sort), progress bar, and task list with priority indicators, due dates, edit/delete actions |
-| 3 | ![Calendar](docs/screenshots/calendar.png) | **Calendar** — Month grid with today highlight, task dots on due dates, selected-date task breakdown panel |
-| 4 | ![Pomodoro](docs/screenshots/pomodoro.png) | **Pomodoro Timer** — Configurable duration inputs, dual SVG rings (phase + total progress), start/pause/resume/reset controls |
-| 5 | ![Planner](docs/screenshots/planner.png) | **Study Planner** — Auto-generated daily sessions, progress stats, upcoming deadlines, high-priority tasks, streak counter |
-| 6 | ![Mobile](docs/screenshots/mobile.png) | **Mobile Layout** — Collapsed sidebar with hamburger menu, stacked stat cards, full-width task list |
-
-> **Screenshot how-to:** Open `docs/demo-data.html` in your browser, click "Seed Demo Data", then open `index.html` and capture screenshots at 1440×900 (no browser toolbar). Mobile screenshots at 375×812. Save PNGs to `docs/screenshots/`.
+| 1 | ![Dashboard](docs/screenshots/dashboard.png) | **Dashboard View** — Main overview with greeting, 4 stat cards (Total, Completed, Pending, Productivity %), quick actions, recent tasks list, and SVG progress ring |
+| 2 | ![Tasks](docs/screenshots/tasks.png) | **Task Manager** — List view showing all tasks with due dates, estimated focus sessions, priority badges, category labels, edit/delete controls, and progress bar |
+| 3 | ![Search & Filters](docs/screenshots/filters.png) | **Search & Filters** — Real-time filter pipeline searching title and filtering by Priority (High, Medium, Low) and Category (Study, Work, Health, Personal) |
+| 4 | ![Calendar View](docs/screenshots/calendar.png) | **Calendar View** — Monthly scheduler grid with active day highlights, task indicator dots on due dates, and a side-panel detailed daily tasks listing |
+| 5 | ![Pomodoro Timer](docs/screenshots/pomodoro.png) | **Pomodoro Focus Timer** — Custom-designed study timer with total/focus/break timers, nested SVG countdown rings, and system notifications integration |
+| 6 | ![Study Planner & Analytics](docs/screenshots/planner.png) | **Study Planner** — Scheduler engine showcasing auto-generated hourly study blocks, daily study streaks, deadlines tracker, and session checkoff lists |
+| 7 | ![Dark Mode Dashboard](docs/screenshots/dark-mode.png) | **Dark Mode Dashboard** — Gorgeous, high-contrast dark theme optimized for student focus, applying CSS Custom Properties dynamically across components |
+| 8 | ![Mobile View](docs/screenshots/mobile.png) | **Mobile Layout** — Responsive overlay sidebar, collapsible navigation, single-column dashboard cards, and mobile touch-friendly layout |
 
 ---
 
@@ -296,8 +296,8 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ## Connect
 
-**Shiv Shah** — 4th Year Undergraduate  
-[GitHub](https://github.com/ShivShah018) · [LinkedIn](https://www.linkedin.com/in/shiv-shah-8a175a351/)
+**Shivam Shah** — 4th Year Undergraduate  
+[GitHub](https://github.com/ShivShah018) · [LinkedIn](https://www.linkedin.com/in/shivam-shah-00b070284/)
 
 ---
 

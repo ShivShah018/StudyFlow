@@ -4,6 +4,7 @@ const Pomodoro = (() => {
   let timeLeft = 1200, elapsedSeconds = 0;
   let isFocus = true, cycleCount = 0;
   let timerId = null, isRunning = false, isPaused = false;
+  let activeTaskId = null, taskFocusSeconds = 0;
 
   function init() {
     try {
@@ -28,6 +29,63 @@ const Pomodoro = (() => {
     } catch (e) {
       document.getElementById('pomodoroDisplay').textContent = 'ERR';
       document.getElementById('pomodoroPhase').textContent = 'Init failed, check console';
+    }
+  }
+
+  function setActiveTask(taskId) {
+    activeTaskId = taskId;
+    taskFocusSeconds = 0;
+    renderTaskInfo();
+  }
+
+  function clearActiveTask() {
+    activeTaskId = null;
+    taskFocusSeconds = 0;
+    const info = document.getElementById('pomodoroTaskInfo');
+    if (info) info.style.display = 'none';
+  }
+
+  function getActiveTask() {
+    if (!activeTaskId) return null;
+    const tasks = Storage.getTasks();
+    return tasks.find(t => t.id === activeTaskId) || null;
+  }
+
+  function saveTaskProgress() {
+    const task = getActiveTask();
+    if (!task) return;
+    const additional = Math.floor(taskFocusSeconds / 60);
+    if (additional === 0) return;
+    const studied = (task.studiedMinutes || 0) + additional;
+    taskFocusSeconds = taskFocusSeconds % 60;
+    Storage.updateTask(task.id, { studiedMinutes: studied });
+    if (task.estimatedDuration && studied >= task.estimatedDuration) {
+      Storage.updateTask(task.id, { completed: true, completedAt: new Date().toISOString() });
+      Utils.showToast('Task completed! Great work!', 'success');
+      clearActiveTask();
+      if (typeof TaskManager !== 'undefined') TaskManager.renderPage();
+      if (typeof Dashboard !== 'undefined') Dashboard.render();
+    }
+  }
+
+  function renderTaskInfo() {
+    const task = getActiveTask();
+    const info = document.getElementById('pomodoroTaskInfo');
+    const titleEl = document.getElementById('pomodoroTaskTitle');
+    const progressEl = document.getElementById('pomodoroTaskProgress');
+    if (!task || !info || !titleEl || !progressEl) {
+      if (info) info.style.display = 'none';
+      return;
+    }
+    info.style.display = '';
+    titleEl.textContent = 'Studying: ' + task.title;
+    const studied = (task.studiedMinutes || 0) + Math.floor(taskFocusSeconds / 60);
+    const total = task.estimatedDuration || 0;
+    if (total > 0) {
+      const remaining = Math.max(0, total - studied);
+      progressEl.textContent = studied + ' min studied · ' + remaining + ' min remaining';
+    } else {
+      progressEl.textContent = studied + ' min studied';
     }
   }
 
@@ -63,6 +121,7 @@ const Pomodoro = (() => {
   }
 
   function updateDisplay() {
+    renderTaskInfo();
     const d = document.getElementById('pomodoroDisplay');
     const p = document.getElementById('pomodoroPhase');
     const s = document.getElementById('pomodoroStatus');
@@ -118,6 +177,10 @@ const Pomodoro = (() => {
 
   function tick() {
     timeLeft--; elapsedSeconds++;
+    if (isFocus && activeTaskId) {
+      taskFocusSeconds++;
+      if (taskFocusSeconds % 60 === 0) saveTaskProgress();
+    }
     updateDisplay();
     if (timeLeft > 0) return;
     const total = totalMinutes * 60;
@@ -144,6 +207,7 @@ const Pomodoro = (() => {
     if (!isRunning || isPaused) return;
     isPaused = true;
     if (timerId) { clearInterval(timerId); timerId = null; }
+    if (activeTaskId && taskFocusSeconds > 0) saveTaskProgress();
     updateDisplay();
   }
 
@@ -157,6 +221,7 @@ const Pomodoro = (() => {
   function resetTimer() {
     if (timerId) { clearInterval(timerId); timerId = null; }
     isRunning = false; isPaused = false;
+    if (activeTaskId && taskFocusSeconds > 0) saveTaskProgress();
     loadSettings();
     syncInputsToDOM();
     updateDisplay();
@@ -176,5 +241,5 @@ const Pomodoro = (() => {
     updateDisplay();
   }
 
-  return { init };
+  return { init, setActiveTask, clearActiveTask, getActiveTask };
 })();

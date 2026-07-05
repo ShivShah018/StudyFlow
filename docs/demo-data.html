@@ -67,12 +67,12 @@ function seed() {
   }
 
   const tasks = [
-    { id: 'id001', title: 'CS301 — Final Project Report', priority: 'high', category: 'Study', dueDate: d(5), estimatedDuration: 240, completed: false, completedAt: null, createdAt: iso(-10, 14, 30), subject: 'Computer Science' },
-    { id: 'id002', title: 'MTH302 — Problem Set 7', priority: 'high', category: 'Study', dueDate: d(2), estimatedDuration: 180, completed: false, completedAt: null, createdAt: iso(-8, 10, 0), subject: 'Mathematics' },
+    { id: 'id001', title: 'CS301 — Final Project Report', priority: 'high', category: 'Study', dueDate: d(5), estimatedDuration: 240, studiedMinutes: 60, completed: false, completedAt: null, createdAt: iso(-10, 14, 30), subject: 'Computer Science' },
+    { id: 'id002', title: 'MTH302 — Problem Set 7', priority: 'high', category: 'Study', dueDate: d(2), estimatedDuration: 180, studiedMinutes: 30, completed: false, completedAt: null, createdAt: iso(-8, 10, 0), subject: 'Mathematics' },
     { id: 'id003', title: 'PHY201 — Lab Report: Optics', priority: 'medium', category: 'Study', dueDate: d(3), estimatedDuration: 120, completed: false, completedAt: null, createdAt: iso(-6, 16, 45), subject: 'Physics' },
-    { id: 'id004', title: 'Prepare Internship Presentation', priority: 'high', category: 'Work', dueDate: d(1), estimatedDuration: 90, completed: false, completedAt: null, createdAt: iso(-4, 9, 15), subject: 'Work' },
+    { id: 'id004', title: 'Prepare Internship Presentation', priority: 'high', category: 'Work', dueDate: d(1), estimatedDuration: 90, studiedMinutes: 30, completed: false, completedAt: null, createdAt: iso(-4, 9, 15), subject: 'Work' },
     { id: 'id005', title: 'Team Standup Notes Review', priority: 'low', category: 'Work', dueDate: d(1), estimatedDuration: 30, completed: true, completedAt: iso(-2, 11, 0), createdAt: iso(-7, 8, 0), subject: 'Work' },
-    { id: 'id006', title: 'Read Chapters 5–7 (Textbook)', priority: 'medium', category: 'Study', dueDate: d(7), estimatedDuration: 300, completed: false, completedAt: null, createdAt: iso(-12, 20, 0), subject: 'Computer Science' },
+    { id: 'id006', title: 'Read Chapters 5–7 (Textbook)', priority: 'medium', category: 'Study', dueDate: d(7), estimatedDuration: 300, studiedMinutes: 45, completed: false, completedAt: null, createdAt: iso(-12, 20, 0), subject: 'Computer Science' },
     { id: 'id007', title: 'Plan Weekly Workout Schedule', priority: 'low', category: 'Health', dueDate: d(4), estimatedDuration: 60, completed: false, completedAt: null, createdAt: iso(-5, 7, 30), subject: 'Health' },
     { id: 'id008', title: 'Monthly Budget Review', priority: 'low', category: 'Personal', dueDate: d(10), estimatedDuration: 45, completed: false, completedAt: null, createdAt: iso(-14, 18, 0), subject: 'Personal' },
     { id: 'id009', title: 'CS301 — Peer Code Review', priority: 'medium', category: 'Study', dueDate: d(4), estimatedDuration: 120, completed: false, completedAt: null, createdAt: iso(-3, 13, 20), subject: 'Computer Science' },

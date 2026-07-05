@@ -30,6 +30,8 @@
 .task-actions button:hover { background: var(--bg-input); color: var(--text-primary); }
 .task-actions .edit-btn:hover { color: var(--accent); }
 .task-actions .delete-btn:hover { color: var(--danger); }
+.task-actions .study-btn:hover { color: var(--success); }
+.task-study-progress { font-size: 11px; padding: 1px 8px; border-radius: 10px; background: var(--accent-light); color: var(--accent); font-weight: 600; }
 .task-priority-indicator { width: 4px; height: 32px; border-radius: 2px; flex-shrink: 0; }
 .task-priority-indicator.high { background: var(--priority-high); }
 .task-priority-indicator.medium { background: var(--priority-medium); }

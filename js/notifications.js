@@ -3,12 +3,37 @@ const Notifications = (() => {
   const QUOTES = ['Small progress every day leads to big results.', 'Consistency beats intensity.', 'The secret of getting ahead is getting started.', 'Success is the sum of small efforts repeated day after day.', 'Believe you can and you are halfway there.', 'Your only limit is your mind.', 'Education is the most powerful weapon to change the world.', 'The expert in anything was once a beginner.', 'It does not matter how slowly you go as long as you do not stop.', 'Push yourself, because no one else is going to do it for you.'];
   function getSettings() { try { const d = localStorage.getItem('studyflow_notif_settings'); return d ? { ...DEFAULT_SETTINGS, ...JSON.parse(d) } : { ...DEFAULT_SETTINGS }; } catch { return { ...DEFAULT_SETTINGS }; } }
   function saveSettings(s) { localStorage.setItem('studyflow_notif_settings', JSON.stringify(s)); }
+
+  function playBeep(tag) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine'; const now = ctx.currentTime;
+      if (tag === 'pomodoro_complete') {
+        [523, 659, 784].forEach((f, i) => { osc.frequency.setValueAtTime(f, now + i * 0.15); });
+        gain.gain.setValueAtTime(0.25, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+        osc.start(now); osc.stop(now + 0.55);
+      } else if (tag === 'pomodoro_break') {
+        osc.frequency.setValueAtTime(440, now);
+        gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now); osc.stop(now + 0.25);
+      } else if (tag && tag.startsWith('deadline')) {
+        for (let i = 0; i < 3; i++) { const o = ctx.createOscillator(), g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.type = 'square'; o.frequency.setValueAtTime(880, now + i * 0.35); g.gain.setValueAtTime(0.12, now + i * 0.35); g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.35 + 0.2); o.start(now + i * 0.35); o.stop(now + i * 0.35 + 0.2); }
+      } else {
+        osc.frequency.setValueAtTime(660, now);
+        gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now); osc.stop(now + 0.2);
+      }
+    } catch {}
+  }
+
   function init() { if (!('Notification' in window)) return; const status = localStorage.getItem('studyflow_notif_permission'); if (status === 'denied' || status === 'granted') return; if (Notification.permission === 'default') { Notification.requestPermission().then(p => localStorage.setItem('studyflow_notif_permission', p)); } else { localStorage.setItem('studyflow_notif_permission', Notification.permission); } scheduleDailyChecks(); }
-  function send(title, body, tag) { if (!('Notification' in window) || Notification.permission !== 'granted') return; try { new Notification(title, { body, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%236366f1"/><text x="50" y="68" font-size="50" text-anchor="middle" fill="white">&#9733;</text></svg>', tag }); } catch {} }
-  function notifyPomodoroStart() { const s = getSettings(); if (s.pomodoroNotifications) send('Pomodoro Started', 'Focus Session Started! Time to study.', 'pomodoro_start'); }
-  function notifyPomodoroComplete() { const s = getSettings(); if (s.pomodoroNotifications) send('Pomodoro Complete', 'Focus Session Complete! Take a break.', 'pomodoro_complete'); Utils.showToast('Pomodoro complete! Time for a break.', 'success'); }
-  function notifyPomodoroBreakOver() { const s = getSettings(); if (s.pomodoroNotifications) send('Break Over', 'Break over! Time to focus.', 'pomodoro_break'); }
-  function scheduleDailyChecks() { setInterval(() => { const h = new Date().getHours(); if (h === 8) send('Daily Motivation', QUOTES[Math.floor(Math.random() * QUOTES.length)], 'motivation'); }, 3600000); }
+  function send(title, body, tag) { if (!('Notification' in window) || Notification.permission !== 'granted') return; try { new Notification(title, { body, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%236366f1"/><text x="50" y="68" font-size="50" text-anchor="middle" fill="white">&#9733;</text></svg>', tag, requireInteraction: true }); playBeep(tag); } catch {} }
+  function notifyPomodoroStart() { const s = getSettings(); if (s.pomodoroNotifications) { send('Pomodoro Started', 'Focus Session Started! Time to study.', 'pomodoro_start'); playBeep('pomodoro_start'); } }
+  function notifyPomodoroComplete() { const s = getSettings(); if (s.pomodoroNotifications) { send('Pomodoro Complete', 'Focus Session Complete! Take a break.', 'pomodoro_complete'); playBeep('pomodoro_complete'); } Utils.showToast('Pomodoro complete! Time for a break.', 'success'); }
+  function notifyPomodoroBreakOver() { const s = getSettings(); if (s.pomodoroNotifications) { send('Break Over', 'Break over! Time to focus.', 'pomodoro_break'); playBeep('pomodoro_break'); } }
+  function scheduleDailyChecks() { setInterval(() => { const h = new Date().getHours(); if (h === 8) { send('Daily Motivation', QUOTES[Math.floor(Math.random() * QUOTES.length)], 'motivation'); playBeep('motivation'); } }, 3600000); }
   function calculateStreak(completedDates) {
     if (!completedDates || completedDates.length === 0) return 0;
     const sorted = [...new Set(completedDates)].sort().reverse();

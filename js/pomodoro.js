@@ -241,5 +241,7 @@ const Pomodoro = (() => {
     updateDisplay();
   }
 
-  return { init, setActiveTask, clearActiveTask, getActiveTask };
+  function getActiveTaskId() { return activeTaskId; }
+
+  return { init, setActiveTask, clearActiveTask, getActiveTask, getActiveTaskId };
 })();

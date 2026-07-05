@@ -71,16 +71,16 @@ Students juggle multiple courses, assignment deadlines, exam preparation, and st
 
 ## Screenshots
 
-*Add screenshots to the `screenshots/` directory and link them here.*
-
 | # | Screenshot | Caption |
 |---|------------|---------|
-| 1 | `screenshots/dashboard.png` | **Dashboard** — Welcome greeting, 4 stat cards (Total, Completed, Pending, Productivity %), quick-actions grid, recent tasks, and SVG productivity ring |
-| 2 | `screenshots/tasks.png` | **Task Manager** — Filter bar (search, priority, category, sort), progress bar, and task list with priority indicators, due dates, edit/delete actions |
-| 3 | `screenshots/calendar.png` | **Calendar** — Month grid with today highlight, task dots on due dates, selected-date task breakdown panel |
-| 4 | `screenshots/pomodoro.png` | **Pomodoro Timer** — Configurable duration inputs, dual SVG rings (phase + total progress), start/pause/resume/reset controls |
-| 5 | `screenshots/planner.png` | **Study Planner** — Auto-generated daily sessions, progress stats, upcoming deadlines, high-priority tasks, streak counter |
-| 6 | `screenshots/mobile.png` | **Mobile Layout** — Collapsed sidebar with hamburger menu, stacked stat cards, full-width task list |
+| 1 | ![Dashboard](docs/screenshots/dashboard.png) | **Dashboard** — Welcome greeting, 4 stat cards (Total, Completed, Pending, Productivity %), quick-actions grid, recent tasks, and SVG productivity ring |
+| 2 | ![Tasks](docs/screenshots/tasks.png) | **Task Manager** — Filter bar (search, priority, category, sort), progress bar, and task list with priority indicators, due dates, edit/delete actions |
+| 3 | ![Calendar](docs/screenshots/calendar.png) | **Calendar** — Month grid with today highlight, task dots on due dates, selected-date task breakdown panel |
+| 4 | ![Pomodoro](docs/screenshots/pomodoro.png) | **Pomodoro Timer** — Configurable duration inputs, dual SVG rings (phase + total progress), start/pause/resume/reset controls |
+| 5 | ![Planner](docs/screenshots/planner.png) | **Study Planner** — Auto-generated daily sessions, progress stats, upcoming deadlines, high-priority tasks, streak counter |
+| 6 | ![Mobile](docs/screenshots/mobile.png) | **Mobile Layout** — Collapsed sidebar with hamburger menu, stacked stat cards, full-width task list |
+
+> **Screenshot how-to:** Open `docs/demo-data.html` in your browser, click "Seed Demo Data", then open `index.html` and capture screenshots at 1440×900 (no browser toolbar). Mobile screenshots at 375×812. Save PNGs to `docs/screenshots/`.
 
 ---
 

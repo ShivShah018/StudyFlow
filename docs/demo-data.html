@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyFlow — Seed Demo Data</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; max-width: 640px; margin: 0 auto; padding: 32px 20px; line-height: 1.6; color: #1e293b; background: #f8fafc; }
+  h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { color: #64748b; margin-bottom: 24px; }
+  .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; }
+  .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; }
+  button { padding: 14px 28px; font-size: 16px; font-weight: 600; cursor: pointer; background: #6366f1; color: white; border: none; border-radius: 8px; transition: background 0.2s; width: 100%; }
+  button:hover { background: #4f46e5; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .success { color: #16a34a; font-weight: 600; font-size: 16px; margin-top: 16px; padding: 12px 16px; background: #dcfce7; border-radius: 8px; }
+  .details { font-size: 13px; color: #64748b; margin-top: 12px; background: #f1f5f9; padding: 12px 16px; border-radius: 8px; max-height: 200px; overflow-y: auto; font-family: monospace; white-space: pre-wrap; }
+  label { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 10px; cursor: pointer; }
+  .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .step-num { background: #6366f1; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+</style>
+</head>
+<body>
+<h1>StudyFlow Demo Data Seeder</h1>
+<p class="subtitle">Populate localStorage with realistic demo data for screenshots and evaluation.</p>
+
+<div class="warning">
+  <strong>⚠️ This will overwrite any existing StudyFlow data</strong> (tasks, planner schedule, timer settings, notification preferences).
+</div>
+
+<div class="card">
+  <div style="margin-bottom:16px;font-weight:600;">What gets seeded:</div>
+  <div class="step"><span class="step-num">1</span><div><strong>17 realistic tasks</strong> — assignments, exams, personal todos across Study, Work, Health, Personal categories</div></div>
+  <div class="step"><span class="step-num">2</span><div><strong>Planner schedule</strong> — 7 days of auto-generated study sessions, some marked complete for streak data</div></div>
+  <div class="step"><span class="step-num">3</span><div><strong>5-day study streak</strong> — consecutive completed dates for the streak counter</div></div>
+  <div class="step"><span class="step-num">4</span><div><strong>Timer & notification settings</strong> — sensible defaults already configured</div></div>
+</div>
+
+<button id="seedBtn" onclick="seed()">Seed Demo Data</button>
+<div id="status"></div>
+
+<script>
+function makeId(ts, rand) {
+  return Number(ts).toString(36) + rand;
+}
+
+function seed() {
+  const btn = document.getElementById('seedBtn');
+  btn.disabled = true;
+  btn.textContent = 'Seeding...';
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  function d(offset) {
+    const dt = new Date(today);
+    dt.setDate(dt.getDate() + offset);
+    return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+  }
+
+  function iso(offset, hours, mins) {
+    const dt = new Date(today);
+    dt.setDate(dt.getDate() + offset);
+    dt.setHours(hours || 0, mins || 0, 0, 0);
+    return dt.toISOString();
+  }
+
+  const tasks = [
+    { id: 'id001', title: 'CS301 — Final Project Report', priority: 'high', category: 'Study', dueDate: d(5), estimatedDuration: 240, completed: false, completedAt: null, createdAt: iso(-10, 14, 30), subject: 'Computer Science' },
+    { id: 'id002', title: 'MTH302 — Problem Set 7', priority: 'high', category: 'Study', dueDate: d(2), estimatedDuration: 180, completed: false, completedAt: null, createdAt: iso(-8, 10, 0), subject: 'Mathematics' },
+    { id: 'id003', title: 'PHY201 — Lab Report: Optics', priority: 'medium', category: 'Study', dueDate: d(3), estimatedDuration: 120, completed: false, completedAt: null, createdAt: iso(-6, 16, 45), subject: 'Physics' },
+    { id: 'id004', title: 'Prepare Internship Presentation', priority: 'high', category: 'Work', dueDate: d(1), estimatedDuration: 90, completed: false, completedAt: null, createdAt: iso(-4, 9, 15), subject: 'Work' },
+    { id: 'id005', title: 'Team Standup Notes Review', priority: 'low', category: 'Work', dueDate: d(1), estimatedDuration: 30, completed: true, completedAt: iso(-2, 11, 0), createdAt: iso(-7, 8, 0), subject: 'Work' },
+    { id: 'id006', title: 'Read Chapters 5–7 (Textbook)', priority: 'medium', category: 'Study', dueDate: d(7), estimatedDuration: 300, completed: false, completedAt: null, createdAt: iso(-12, 20, 0), subject: 'Computer Science' },
+    { id: 'id007', title: 'Plan Weekly Workout Schedule', priority: 'low', category: 'Health', dueDate: d(4), estimatedDuration: 60, completed: false, completedAt: null, createdAt: iso(-5, 7, 30), subject: 'Health' },
+    { id: 'id008', title: 'Monthly Budget Review', priority: 'low', category: 'Personal', dueDate: d(10), estimatedDuration: 45, completed: false, completedAt: null, createdAt: iso(-14, 18, 0), subject: 'Personal' },
+    { id: 'id009', title: 'CS301 — Peer Code Review', priority: 'medium', category: 'Study', dueDate: d(4), estimatedDuration: 120, completed: false, completedAt: null, createdAt: iso(-3, 13, 20), subject: 'Computer Science' },
+    { id: 'id010', title: 'MTH302 — Quiz Preparation', priority: 'high', category: 'Study', dueDate: d(-2), estimatedDuration: 150, completed: true, completedAt: iso(-3, 17, 0), createdAt: iso(-8, 11, 30), subject: 'Mathematics' },
+    { id: 'id011', title: 'Dentist Appointment', priority: 'medium', category: 'Personal', dueDate: d(0), estimatedDuration: 60, completed: false, completedAt: null, createdAt: iso(-14, 9, 0), subject: 'Personal' },
+    { id: 'id012', title: 'Update Portfolio Website', priority: 'low', category: 'Work', dueDate: d(15), estimatedDuration: 180, completed: false, completedAt: null, createdAt: iso(-30, 15, 0), subject: 'Work' },
+    { id: 'id013', title: 'PHY201 — Practice Problems Ch.4', priority: 'medium', category: 'Study', dueDate: d(1), estimatedDuration: 90, completed: false, completedAt: null, createdAt: iso(-5, 10, 45), subject: 'Physics' },
+    { id: 'id014', title: 'Research Paper Annotations', priority: 'high', category: 'Study', dueDate: d(9), estimatedDuration: 360, completed: false, completedAt: null, createdAt: iso(-20, 21, 0), subject: 'Computer Science' },
+    { id: 'id015', title: 'Grocery Shopping', priority: 'low', category: 'Personal', dueDate: d(0), estimatedDuration: 30, completed: true, completedAt: iso(-1, 10, 30), createdAt: iso(-3, 19, 0), subject: 'Personal' },
+    { id: 'id016', title: 'CS301 — Database Design Doc', priority: 'medium', category: 'Study', dueDate: d(6), estimatedDuration: 180, completed: false, completedAt: null, createdAt: iso(-9, 14, 0), subject: 'Computer Science' },
+    { id: 'id017', title: 'Weekly Progress Review', priority: 'low', category: 'Work', dueDate: d(0), estimatedDuration: 45, completed: false, completedAt: null, createdAt: iso(-7, 8, 30), subject: 'Work' },
+  ];
+
+  const completedDates = [d(-4), d(-3), d(-2), d(-1), d(0)];
+
+  const sessions = [
+    { id: 'sid01', taskId: 'id001', title: 'CS301 — Final Project Report', subject: 'Computer Science', date: d(0), startTime: '08:00', duration: 50, priority: 'high', completed: true, deadline: d(5) },
+    { id: 'sid02', taskId: 'id001', title: 'CS301 — Final Project Report', subject: 'Computer Science', date: d(0), startTime: '09:00', duration: 50, priority: 'high', completed: true, deadline: d(5) },
+    { id: 'sid03', taskId: 'id001', title: 'CS301 — Final Project Report', subject: 'Computer Science', date: d(0), startTime: '10:00', duration: 40, priority: 'high', completed: true, deadline: d(5) },
+    { id: 'sid04', taskId: 'id002', title: 'MTH302 — Problem Set 7', subject: 'Mathematics', date: d(0), startTime: '11:00', duration: 50, priority: 'high', completed: true, deadline: d(2) },
+    { id: 'sid05', taskId: 'id002', title: 'MTH302 — Problem Set 7', subject: 'Mathematics', date: d(0), startTime: '14:00', duration: 50, priority: 'high', completed: false, deadline: d(2) },
+    { id: 'sid06', taskId: 'id003', title: 'PHY201 — Lab Report: Optics', subject: 'Physics', date: d(0), startTime: '15:00', duration: 50, priority: 'medium', completed: false, deadline: d(3) },
+    { id: 'sid07', taskId: 'id004', title: 'Prepare Internship Presentation', subject: 'Work', date: d(0), startTime: '16:00', duration: 50, priority: 'high', completed: false, deadline: d(1) },
+    { id: 'sid08', taskId: 'id013', title: 'PHY201 — Practice Problems Ch.4', subject: 'Physics', date: d(1), startTime: '08:00', duration: 50, priority: 'medium', completed: false, deadline: d(1) },
+    { id: 'sid09', taskId: 'id004', title: 'Prepare Internship Presentation', subject: 'Work', date: d(1), startTime: '09:00', duration: 40, priority: 'high', completed: false, deadline: d(1) },
+    { id: 'sid10', taskId: 'id002', title: 'MTH302 — Problem Set 7', subject: 'Mathematics', date: d(1), startTime: '10:00', duration: 50, priority: 'high', completed: false, deadline: d(2) },
+    { id: 'sid11', taskId: 'id016', title: 'CS301 — Database Design Doc', subject: 'Computer Science', date: d(2), startTime: '08:00', duration: 50, priority: 'medium', completed: false, deadline: d(6) },
+    { id: 'sid12', taskId: 'id016', title: 'CS301 — Database Design Doc', subject: 'Computer Science', date: d(2), startTime: '09:00', duration: 50, priority: 'medium', completed: false, deadline: d(6) },
+    { id: 'sid13', taskId: 'id002', title: 'MTH302 — Problem Set 7', subject: 'Mathematics', date: d(2), startTime: '10:00', duration: 50, priority: 'high', completed: false, deadline: d(2) },
+    { id: 'sid14', taskId: 'id003', title: 'PHY201 — Lab Report: Optics', subject: 'Physics', date: d(2), startTime: '14:00', duration: 50, priority: 'medium', completed: false, deadline: d(3) },
+    { id: 'sid15', taskId: 'id009', title: 'CS301 — Peer Code Review', subject: 'Computer Science', date: d(2), startTime: '15:00', duration: 50, priority: 'medium', completed: false, deadline: d(4) },
+    { id: 'sid16', taskId: 'id001', title: 'CS301 — Final Project Report', subject: 'Computer Science', date: d(3), startTime: '08:00', duration: 50, priority: 'high', completed: false, deadline: d(5) },
+    { id: 'sid17', taskId: 'id001', title: 'CS301 — Final Project Report', subject: 'Computer Science', date: d(3), startTime: '09:00', duration: 50, priority: 'high', completed: false, deadline: d(5) },
+    { id: 'sid18', taskId: 'id009', title: 'CS301 — Peer Code Review', subject: 'Computer Science', date: d(3), startTime: '10:00', duration: 50, priority: 'medium', completed: false, deadline: d(4) },
+    { id: 'sid19', taskId: 'id007', title: 'Plan Weekly Workout Schedule', subject: 'Health', date: d(3), startTime: '14:00', duration: 50, priority: 'low', completed: false, deadline: d(4) },
+    { id: 'sid20', taskId: 'id006', title: 'Read Chapters 5–7 (Textbook)', subject: 'Computer Science', date: d(4), startTime: '08:00', duration: 50, priority: 'medium', completed: false, deadline: d(7) },
+    { id: 'sid21', taskId: 'id006', title: 'Read Chapters 5–7 (Textbook)', subject: 'Computer Science', date: d(4), startTime: '09:00', duration: 50, priority: 'medium', completed: false, deadline: d(7) },
+    { id: 'sid22', taskId: 'id006', title: 'Read Chapters 5–7 (Textbook)', subject: 'Computer Science', date: d(4), startTime: '10:00', duration: 50, priority: 'medium', completed: false, deadline: d(7) },
+    { id: 'sid23', taskId: 'id014', title: 'Research Paper Annotations', subject: 'Computer Science', date: d(5), startTime: '08:00', duration: 50, priority: 'high', completed: false, deadline: d(9) },
+    { id: 'sid24', taskId: 'id014', title: 'Research Paper Annotations', subject: 'Computer Science', date: d(5), startTime: '09:00', duration: 50, priority: 'high', completed: false, deadline: d(9) },
+    { id: 'sid25', taskId: 'id014', title: 'Research Paper Annotations', subject: 'Computer Science', date: d(5), startTime: '10:00', duration: 50, priority: 'high', completed: false, deadline: d(9) },
+    { id: 'sid26', taskId: 'id010', title: 'MTH302 — Quiz Preparation', subject: 'Mathematics', date: d(-4), startTime: '08:00', duration: 50, priority: 'high', completed: true, deadline: d(-2) },
+    { id: 'sid27', taskId: 'id010', title: 'MTH302 — Quiz Preparation', subject: 'Mathematics', date: d(-4), startTime: '09:00', duration: 50, priority: 'high', completed: true, deadline: d(-2) },
+    { id: 'sid28', taskId: 'id010', title: 'MTH302 — Quiz Preparation', subject: 'Mathematics', date: d(-4), startTime: '10:00', duration: 50, priority: 'high', completed: true, deadline: d(-2) },
+    { id: 'sid29', taskId: 'id005', title: 'Team Standup Notes Review', subject: 'Work', date: d(-3), startTime: '08:00', duration: 30, priority: 'low', completed: true, deadline: d(1) },
+    { id: 'sid30', taskId: 'id015', title: 'Grocery Shopping', subject: 'Personal', date: d(-2), startTime: '09:00', duration: 30, priority: 'low', completed: true, deadline: d(0) },
+    { id: 'sid31', taskId: 'id012', title: 'Update Portfolio Website', subject: 'Work', date: d(6), startTime: '08:00', duration: 50, priority: 'low', completed: false, deadline: d(15) },
+    { id: 'sid32', taskId: 'id012', title: 'Update Portfolio Website', subject: 'Work', date: d(6), startTime: '09:00', duration: 50, priority: 'low', completed: false, deadline: d(15) },
+    { id: 'sid33', taskId: 'id012', title: 'Update Portfolio Website', subject: 'Work', date: d(6), startTime: '10:00', duration: 50, priority: 'low', completed: false, deadline: d(15) },
+    { id: 'sid34', taskId: 'id012', title: 'Update Portfolio Website', subject: 'Work', date: d(7), startTime: '08:00', duration: 30, priority: 'low', completed: false, deadline: d(15) },
+    { id: 'sid35', taskId: 'id008', title: 'Monthly Budget Review', subject: 'Personal', date: d(7), startTime: '09:00', duration: 45, priority: 'low', completed: false, deadline: d(10) },
+  ];
+
+  localStorage.clear();
+
+  localStorage.setItem('studyflow_tasks', JSON.stringify(tasks));
+  localStorage.setItem('studyflow_planner_schedule', JSON.stringify({ sessions, generatedAt: new Date().toISOString() }));
+  localStorage.setItem('studyflow_planner_completed_dates', JSON.stringify(completedDates));
+  localStorage.setItem('studyflow_notif_settings', JSON.stringify({ deadlineReminders: true, studySessionReminders: true, pomodoroNotifications: true, dailyMotivation: true, dailySummary: false, reminderTiming: 15 }));
+  localStorage.setItem('studyflow_notif_permission', 'granted');
+  localStorage.setItem('studyflow_pomodoro_settings', JSON.stringify({ totalMinutes: 60, focusMinutes: 25, breakMinutes: 5 }));
+
+  const status = document.getElementById('status');
+  status.innerHTML = '<div class="success"> Demo data seeded successfully!</div>' +
+    '<div class="details">' +
+    'Tasks: ' + tasks.length + '\n' +
+    'Planner sessions: ' + sessions.length + '\n' +
+    'Completed sessions: ' + sessions.filter(s => s.completed).length + '\n' +
+    'Study streak days: ' + completedDates.length + '\n\n' +
+    'Next steps:\n' +
+    '1. Open StudyFlow/index.html in your browser\n' +
+    '2. Navigate through each page for screenshots\n' +
+    '3. To reset, clear localStorage via DevTools → Application → Clear Storage' +
+    '</div>';
+
+  btn.textContent = ' Seed Again';
+  btn.disabled = false;
+
+  console.log('StudyFlow demo data seeded successfully!');
+  console.log('Open index.html to view the populated application.');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const hasData = localStorage.getItem('studyflow_tasks');
+  if (hasData) {
+    document.getElementById('status').innerHTML = '<div style="margin-top:16px;padding:12px 16px;background:#e0f2fe;border-radius:8px;font-size:14px;color:#0369a1;"> Existing StudyFlow data detected. Click "Seed Demo Data" to overwrite.</div>';
+  }
+});
+</script>
+</body>
+</html>

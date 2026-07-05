@@ -142,14 +142,17 @@ const StudyPlanner = (() => {
       </div>`).join('');
   }
 
+  function handlePlannerClick(e) {
+    const btn = e.target.closest('.planner-complete-btn'); if (!btn) return;
+    const id = btn.dataset.id; toggleSessionComplete(id);
+  }
+
   function bindEvents() {
     document.getElementById('regeneratePlanBtn')?.addEventListener('click', () => { generateSchedule(); render(); Utils.showToast('Schedule regenerated', 'success'); });
     const container = document.getElementById('page-planner');
     if (!container) return;
-    container.addEventListener('click', e => {
-      const btn = e.target.closest('.planner-complete-btn'); if (!btn) return;
-      const id = btn.dataset.id; toggleSessionComplete(id);
-    });
+    container.removeEventListener('click', handlePlannerClick);
+    container.addEventListener('click', handlePlannerClick);
   }
 
   function toggleSessionComplete(id) {

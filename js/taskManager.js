@@ -78,6 +78,12 @@ const TaskManager = (() => {
     });
   }
 
+  function handleTaskClick(e) {
+    const cb = e.target.closest('.task-checkbox'); if (cb) { const id = cb.dataset.id; Storage.toggleTaskComplete(id); renderPage(); refreshRelatedViews(); return; }
+    const eb = e.target.closest('.edit-btn'); if (eb) { const tasks = Storage.getTasks(); const t = tasks.find(x => x.id === eb.dataset.id); if (t) showTaskModal(t); return; }
+    const db = e.target.closest('.delete-btn'); if (db) { if (confirm('Delete this task?')) { Storage.deleteTask(db.dataset.id); Utils.showToast('Task deleted', 'error'); renderPage(); refreshRelatedViews(); } return; }
+  }
+
   function bindEvents() {
     const container = document.getElementById('page-tasks');
     if (!container) return;
@@ -86,11 +92,8 @@ const TaskManager = (() => {
     document.getElementById('filterPriority')?.addEventListener('change', e => { currentFilter.priority = e.target.value; renderPage(); });
     document.getElementById('filterCategory')?.addEventListener('change', e => { currentFilter.category = e.target.value; renderPage(); });
     document.getElementById('sortTasks')?.addEventListener('change', e => { currentFilter.sort = e.target.value; renderPage(); });
-    container.addEventListener('click', e => {
-      const cb = e.target.closest('.task-checkbox'); if (cb) { const id = cb.dataset.id; Storage.toggleTaskComplete(id); renderPage(); refreshRelatedViews(); return; }
-      const eb = e.target.closest('.edit-btn'); if (eb) { const tasks = Storage.getTasks(); const t = tasks.find(x => x.id === eb.dataset.id); if (t) showTaskModal(t); return; }
-      const db = e.target.closest('.delete-btn'); if (db) { if (confirm('Delete this task?')) { Storage.deleteTask(db.dataset.id); Utils.showToast('Task deleted', 'error'); renderPage(); refreshRelatedViews(); } return; }
-    });
+    container.removeEventListener('click', handleTaskClick);
+    container.addEventListener('click', handleTaskClick);
   }
 
   function setGlobalSearch(q) { currentFilter.search = q; }

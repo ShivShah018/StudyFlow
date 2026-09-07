@@ -176,3 +176,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; back
 .subject-progress-track { height: 8px; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
 .subject-progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--success)); transition: width 0.4s ease; }
 
+/* Planner Layout */
+.planner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+
+

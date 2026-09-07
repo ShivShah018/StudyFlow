@@ -36,6 +36,7 @@
   .form-actions .btn { width: 100%; }
   .productivity-ring { flex-direction: column; align-items: flex-start; }
   .pomodoro-duration-row { flex-direction: column; align-items: center; }
+  .planner-grid { grid-template-columns: 1fr; gap: 16px; }
 }
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }

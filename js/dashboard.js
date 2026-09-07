@@ -47,7 +47,12 @@ const Dashboard = (() => {
       <div class="dashboard-bottom">
         <div class="glass-card">
           <h3><span>Recent Tasks</span><button class="btn btn-sm btn-secondary" data-action="goToTasks">View All</button></h3>
-          ${recentTasks.length === 0 ? '<div class="upcoming-empty">No pending tasks. Great job!</div>' : recentTasks.map(t => `<div class="recent-task-item"><div class="recent-task-check" data-id="${t.id}"></div><div class="recent-task-info"><div class="task-title">${t.title}</div><div class="task-meta"><span class="badge badge-${t.priority||'medium'}">${Utils.capitalize(t.priority||'medium')}</span>${t.category ? `<span class="task-category">${t.category}</span>` : ''}${t.subject ? `<span class="task-category" style="background:var(--accent-light);color:var(--accent);">${Utils.escapeHTML(t.subject)}</span>` : ''}</div></div></div>`).join('')}
+          ${recentTasks.length === 0 ? '<div class="upcoming-empty">No pending tasks. Great job!</div>' : recentTasks.map(t => {
+            const overdue = t.dueDate && Utils.isOverdue(t.dueDate);
+            const dueLabel = t.dueDate ? (Utils.daysUntil(t.dueDate) === 'Today' ? 'Due Today' : Utils.daysUntil(t.dueDate) === 'Tomorrow' ? 'Due Tomorrow' : overdue ? 'Overdue' : Utils.daysUntil(t.dueDate)) : '';
+            const dueBadge = t.dueDate ? `<span class="badge ${overdue ? 'badge-high' : dueLabel.includes('Due') ? 'badge-medium' : 'badge-low'}" style="display:inline-flex;align-items:center;gap:3px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${dueLabel}</span>` : '';
+            return `<div class="recent-task-item"><div class="recent-task-check" data-id="${t.id}"></div><div class="recent-task-info"><div class="task-title">${t.title}</div><div class="task-meta"><span class="badge badge-${t.priority||'medium'}">${Utils.capitalize(t.priority||'medium')}</span>${t.category ? `<span class="task-category">${t.category}</span>` : ''}${t.subject ? `<span class="task-category" style="background:var(--accent-light);color:var(--accent);">${Utils.escapeHTML(t.subject)}</span>` : ''}${dueBadge}</div></div></div>`;
+          }).join('')}
         </div>
         <div class="glass-card">
           <h3>Productivity Overview</h3>

@@ -20,4 +20,4 @@
 .calendar-task-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
 .calendar-task-item:last-child { border-bottom: none; }
 .calendar-task-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.calendar-task-info { flex: 1; font-size: 14px; font-weight: 500; }
+.calendar-task-info { flex: 1; font-size: 14px; font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

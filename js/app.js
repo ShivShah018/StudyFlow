@@ -149,7 +149,6 @@ const App = (() => {
       if (pageId === 'tasks') { TaskManager.setGlobalSearch(q); TaskManager.renderPage(); }
       else { navigate('tasks'); TaskManager.setGlobalSearch(q); TaskManager.renderPage(); }
     }, 300));
-    document.addEventListener('keydown', e => { if (e.ctrlKey && e.key === 'k') { e.preventDefault(); document.getElementById('globalSearch')?.focus(); } });
   }
 
   return { init, navigate };

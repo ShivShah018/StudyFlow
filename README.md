@@ -163,7 +163,7 @@ python -m http.server 8000
 > **StudyFlow — Smart Student Productivity Suite** | *Vanilla JS (ES6), HTML5, CSS3, Web Storage API, Service Worker*
 > * Engineered a zero-dependency single-page student productivity suite in modular Vanilla ES6 JavaScript utilizing the Revealing Module Pattern.
 > * Formulated a greedy first-fit auto-scheduling algorithm that partitions task workloads into 50-minute study blocks with 10-minute break buffers within configurable daily working windows.
-> * Implemented task-linked Pomodoro focus tracking, real-time reactive event updates, debounced global search (`Ctrl+K`), subject progress analytics, and Web Notification API integration.
+> * Implemented task-linked Pomodoro focus tracking, real-time reactive event updates, debounced global search, subject progress analytics, and Web Notification API integration.
 > * Built a custom CSS variable design system supporting dynamic light/dark theming and responsive layouts down to 375px viewports.
 
 ---

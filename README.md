@@ -52,7 +52,6 @@ College students frequently struggle with managing assignments, exam preparation
 | **Focus Timer** | **Task-Linked Pomodoro** | Configurable focus/break cycles with dual SVG countdown rings, system notifications, and direct accumulation of studied minutes into task progress. |
 | **Calendar** | **Month Grid Scheduler** | Interactive calendar grid with task indicator dots on due dates and day-by-day task breakdowns. |
 | **Theming** | **Dark / Light Theme Switcher** | Seamless theme toggling using CSS Custom Property design tokens while preserving sidebar contrast. |
-| **Data Control** | **JSON Backup & Restore** | Native file export and import modal allowing instant data backups or loading sample demo datasets. |
 | **Personalization** | **Student Profile & Streaks** | Custom student name configuration and consecutive-day study streak tracking calculated from completed planner sessions. |
 
 ---
@@ -99,7 +98,7 @@ Each module is encapsulated in an Immediately Invoked Function Expression (IIFE)
 ```
 app.js (Bootstrap & Router)
  ├── utils.js         (Formatting, Toast, Debounce, Escape HTML)
- ├── storage.js       (Centralized LocalStorage CRUD, Backup/Restore)
+ ├── storage.js       (Centralized LocalStorage CRUD & Student Profile)
  ├── notifications.js (Web Notifications & Audio Synthesis)
  ├── taskManager.js   (Task CRUD, Filtering, Form Modal with Presets)
  ├── dashboard.js     (Workload Stats, Ring Chart, Subject Analytics)
@@ -164,7 +163,7 @@ python -m http.server 8000
 > **StudyFlow — Smart Student Productivity Suite** | *Vanilla JS (ES6), HTML5, CSS3, Web Storage API, Service Worker*
 > * Engineered a zero-dependency single-page student productivity suite in modular Vanilla ES6 JavaScript utilizing the Revealing Module Pattern.
 > * Formulated a greedy first-fit auto-scheduling algorithm that partitions task workloads into 50-minute study blocks with 10-minute break buffers within configurable daily working windows.
-> * Implemented task-linked Pomodoro focus tracking, real-time reactive event updates, debounced global search (`Ctrl+K`), JSON data backup/restore capabilities, and Web Notification API integration.
+> * Implemented task-linked Pomodoro focus tracking, real-time reactive event updates, debounced global search (`Ctrl+K`), subject progress analytics, and Web Notification API integration.
 > * Built a custom CSS variable design system supporting dynamic light/dark theming and responsive layouts down to 375px viewports.
 
 ---

@@ -4,6 +4,7 @@
 ![CSS3](https://img.shields.io/badge/CSS-Custom_Properties-1572b6?logo=css3&labelColor=333)
 ![HTML5](https://img.shields.io/badge/HTML5-SPA-e34f26?logo=html5&labelColor=333)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![Status](https://img.shields.io/badge/status-complete-brightgreen)
 
 > A lightweight, student-focused productivity single-page web application — built with **zero external dependencies, zero build tools, and zero frameworks**.  

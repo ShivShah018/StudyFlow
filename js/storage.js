@@ -8,5 +8,34 @@ const Storage = (() => {
   function getPlannerSchedule() { try { const d = localStorage.getItem('studyflow_planner_schedule'); return d ? JSON.parse(d) : null; } catch { return null; } }
   function savePlannerSchedule(s) { localStorage.setItem('studyflow_planner_schedule', JSON.stringify(s)); }
   function savePlannerCompletedDates(d) { localStorage.setItem('studyflow_planner_completed_dates', JSON.stringify(d)); }
-  return { getTasks, addTask, updateTask, deleteTask, toggleTaskComplete, getPlannerSchedule, savePlannerSchedule, savePlannerCompletedDates };
+
+  function getStudentName() { return localStorage.getItem('studyflow_student_name') || 'Student'; }
+  function setStudentName(name) { localStorage.setItem('studyflow_student_name', name.trim() || 'Student'); }
+
+  function exportData() {
+    return {
+      version: '1.1',
+      exportedAt: new Date().toISOString(),
+      studentName: getStudentName(),
+      tasks: getTasks(),
+      plannerSchedule: getPlannerSchedule(),
+      plannerCompletedDates: JSON.parse(localStorage.getItem('studyflow_planner_completed_dates') || '[]'),
+      notifSettings: JSON.parse(localStorage.getItem('studyflow_notif_settings') || '{}'),
+      pomodoroSettings: JSON.parse(localStorage.getItem('studyflow_pomodoro_settings') || '{}')
+    };
+  }
+
+  function importData(data) {
+    if (!data || typeof data !== 'object') throw new Error('Invalid JSON format');
+    if (Array.isArray(data.tasks)) saveTasks(data.tasks);
+    if (data.studentName) setStudentName(data.studentName);
+    if (data.plannerSchedule) savePlannerSchedule(data.plannerSchedule);
+    if (Array.isArray(data.plannerCompletedDates)) savePlannerCompletedDates(data.plannerCompletedDates);
+    if (data.notifSettings) localStorage.setItem('studyflow_notif_settings', JSON.stringify(data.notifSettings));
+    if (data.pomodoroSettings) localStorage.setItem('studyflow_pomodoro_settings', JSON.stringify(data.pomodoroSettings));
+    return true;
+  }
+
+  return { getTasks, addTask, updateTask, deleteTask, toggleTaskComplete, getPlannerSchedule, savePlannerSchedule, savePlannerCompletedDates, getStudentName, setStudentName, exportData, importData };
 })();
+

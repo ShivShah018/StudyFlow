@@ -37,6 +37,28 @@
   --topbar-height: 64px;
 }
 
+html[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-sidebar: #0f172a;
+  --bg-sidebar-hover: #1e293b;
+  --bg-card: #ffffff;
+  --bg-input: #f1f5f9;
+  --bg-glass: rgba(255, 255, 255, 0.9);
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-sidebar: #94a3b8;
+  --text-sidebar-active: #ffffff;
+  --border-color: #e2e8f0;
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-light: rgba(79, 70, 229, 0.1);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { font-size: 16px; -webkit-font-smoothing: antialiased; }
 body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; overflow: hidden; height: 100vh; }
@@ -136,3 +158,21 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; back
 .toggle-slider::after { content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%; background: #fff; top: 2px; left: 2px; transition: transform var(--transition); box-shadow: var(--shadow-sm); }
 .notif-toggle input:checked + .toggle-slider { background: var(--accent); }
 .notif-toggle input:checked + .toggle-slider::after { transform: translateX(20px); }
+
+/* Form UX & Presets */
+.preset-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.preset-chip { padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-secondary); cursor: pointer; transition: all var(--transition); }
+.preset-chip:hover { border-color: var(--accent); color: var(--text-primary); }
+.preset-chip.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.form-error { font-size: 12px; color: var(--danger); margin-top: 4px; display: none; }
+.form-group.has-error input, .form-group.has-error select { border-color: var(--danger); }
+.form-group.has-error .form-error { display: block; }
+
+/* Subject Progress & Analytics */
+.subject-progress-grid { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
+.subject-item { display: flex; flex-direction: column; gap: 4px; }
+.subject-item-header { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.subject-item-meta { font-size: 12px; color: var(--text-secondary); }
+.subject-progress-track { height: 8px; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
+.subject-progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--success)); transition: width 0.4s ease; }
+

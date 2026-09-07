@@ -6,8 +6,8 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-complete-brightgreen)
 
-> A single-page student productivity application — built with **zero dependencies, zero build tools, and zero frameworks**.  
-> ~650 lines of vanilla JavaScript across 9 modules, ~290 lines of CSS. Open `index.html` and go.
+> A lightweight, student-focused productivity single-page web application — built with **zero external dependencies, zero build tools, and zero frameworks**.  
+> Persists data locally, supports offline use via Service Worker, and provides intelligent workload auto-scheduling.
 
 [Live Demo](https://shivshah018.github.io/StudyFlow) · [Report Bug](https://github.com/ShivShah018/StudyFlow/issues) · [Request Feature](https://github.com/ShivShah018/StudyFlow/issues)
 
@@ -16,289 +16,168 @@
 ## Table of Contents
 
 - [Problem Statement](#problem-statement)
-- [Features](#features)
+- [Key Features](#key-features)
+- [UX Design Process](#ux-design-process)
 - [Tech Stack](#tech-stack)
-- [Screenshots](#screenshots)
-- [Architecture](#architecture)
-- [Browser APIs Used](#browser-apis-used)
-- [LocalStorage Design](#localstorage-design)
-- [Key Implementation Highlights](#key-implementation-highlights)
+- [Architecture & Design Patterns](#architecture--design-patterns)
+- [Data Storage Schema](#data-storage-schema)
 - [Getting Started](#getting-started)
-- [Usage Guide](#usage-guide)
-- [What I Learned](#what-i-learned)
-- [Future Scope](#future-scope)
+- [Key Learning Outcomes](#key-learning-outcomes)
+- [Resume Representations (SDE vs. UI/UX)](#resume-representations-sde-vs-uiux)
 - [License](#license)
 
 ---
 
 ## Problem Statement
 
-Students juggle multiple courses, assignment deadlines, exam preparation, and study sessions daily. Existing tools are either over-engineered (Notion, Trello) or too narrow (simple todo lists). StudyFlow provides a **lightweight, offline-capable, all-in-one dashboard** that combines task management, a Pomodoro timer, a calendar view, and an auto-scheduling engine — without requiring sign-up, internet, or a backend.
+College students frequently struggle with managing assignments, exam preparations, and project deadlines scattered across multiple course portals. Traditional project management software (Notion, Jira, Trello) is often over-engineered for personal study planning, causing administrative fatigue.
+
+**StudyFlow** solves this problem by providing a streamlined, privacy-first study planner that:
+1. Gives immediate visibility into today's tasks and upcoming deadlines.
+2. Auto-schedules study sessions based on task due dates and estimated effort.
+3. Facilitates deep focus via an integrated task-linked Pomodoro timer.
+4. Requires zero account sign-up, zero server setups, and operates completely offline.
 
 ---
 
-## Features
+## Key Features
 
-| Feature | Description |
-|---------|-------------|
-| **Task Manager** | Create, edit, delete, and filter tasks by priority, category, and due date |
-| **Dashboard** | Stats summary, quick actions, productivity ring chart, recent tasks feed |
-| **Calendar View** | Month grid with task dots, date selection, per-day task breakdown |
-| **Pomodoro Timer** | Configurable focus/break cycles with SVG ring animations and Notification API integration |
-| **Study Planner** | Auto-generates a day-by-day study schedule from task deadlines and estimated durations using a greedy first-fit algorithm |
-| **Global Search** | Debounced cross-page search with `Ctrl + K` keyboard shortcut |
-| **Streak Tracking** | Consecutive-day study streak calculated from completed planner sessions |
-| **Notification System** | Browser Notification API with granular preference toggles (deadlines, study sessions, pomodoro, daily motivation) |
-| **Responsive Design** | Three breakpoints (1024px, 768px, 480px) — sidebar collapses to overlay on mobile |
-| **Persistent Storage** | All data persisted to `localStorage` — zero backend, zero setup, no data leaves the device |
+| Category | Feature | Description |
+|---|---|---|
+| **Dashboard** | **Workload Overview** | Daily greeting, date/clock, 4 stat indicators (Total, Completed, Pending, Productivity %), Quick Actions, recent tasks list, and SVG ring chart. |
+| **Analytics** | **Subject Progress Tracking** | Real-time breakdown of completion percentages and total study minutes logged per academic course (e.g., DSA, DBMS, OS). |
+| **Tasks** | **Task Management** | Full CRUD for tasks with title, description, subject, priority, category, estimated duration, and due date. Includes search, priority/category filtering, and sorting. |
+| **Form UX** | **Duration Presets & Validation** | Quick preset buttons (`30m`, `45m`, `60m`, `90m`, `120m`), subject autocomplete datalist, and inline form error validation. |
+| **Planner** | **Greedy Auto-Scheduler** | Automatically allocates pending tasks into 50-minute study blocks with 10-minute breaks between 08:00–22:00 up to each task's deadline. |
+| **Focus Timer** | **Task-Linked Pomodoro** | Configurable focus/break cycles with dual SVG countdown rings, system notifications, and direct accumulation of studied minutes into task progress. |
+| **Calendar** | **Month Grid Scheduler** | Interactive calendar grid with task indicator dots on due dates and day-by-day task breakdowns. |
+| **Theming** | **Dark / Light Theme Switcher** | Seamless theme toggling using CSS Custom Property design tokens while preserving sidebar contrast. |
+| **Data Control** | **JSON Backup & Restore** | Native file export and import modal allowing instant data backups or loading sample demo datasets. |
+| **Personalization** | **Student Profile & Streaks** | Custom student name configuration and consecutive-day study streak tracking calculated from completed planner sessions. |
+
+---
+
+## UX Design Process
+
+StudyFlow was designed with an explicit focus on reducing cognitive load for university students.
+
+### Target Persona
+* **Primary User:** University undergraduate student managing 4–6 concurrent subjects.
+* **Context:** Seeking a low-overhead productivity hub that requires minimal manual input.
+
+### User Flows
+1. **Task Capture Flow:** Dashboard → `+ New Task` → Duration Chip Selection (`60m`) → Instant Progress Update.
+2. **Focus Execution Flow:** Task List → `Study This Task` → Pomodoro Timer → Automated Task Progress Accumulation.
+3. **Course Balance Flow:** Dashboard Analytics → Inspect Subject Progress (e.g. DBMS at 33%) → Filter Tasks by Subject → Complete Pending Items.
+
+### Key Design Decisions
+* **Duration Chips:** Solved keyboard input friction on mobile by providing one-tap duration selections.
+* **Subject Analytics:** Prevented course imbalance by visually highlighting neglected subjects on the main dashboard.
+* **Persistent Sidebar Anchor:** Kept sidebar dark `#0f172a` in both Light and Dark modes to maintain visual hierarchy and brand consistency.
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| **Language** | JavaScript (ES6) |
-| **Markup** | HTML5 |
-| **Styling** | CSS3 with Custom Properties |
-| **Persistence** | Web Storage API (`localStorage`) |
-| **Notifications** | Web Notifications API |
-| **Charts** | Custom SVG (`stroke-dasharray` / `stroke-dashoffset`) |
-| **Architecture** | Revealing Module Pattern (IIFE) |
-| **Dependencies** | None (zero external libraries, zero build tools) |
+|---|---|
+| **Frontend Core** | HTML5 (Semantic SPA Structure), Vanilla JavaScript (ES6 Modules) |
+| **Styling** | Vanilla CSS3 (CSS Custom Properties, Glassmorphism, Responsive Grid/Flexbox) |
+| **Persistence** | Browser `localStorage` API |
+| **Audio & Alerts** | Web Notifications API, Web Audio API (Synthesized Beep Alerts) |
+| **Graphics** | SVG Circles (`stroke-dasharray` / `stroke-dashoffset` ring charts) |
+| **Offline** | Service Worker (`sw.js`) PWA caching |
+| **Dependencies** | **Zero (0)** external frameworks, libraries, or build tools |
 
 ---
 
-## Screenshots
+## Architecture & Design Patterns
 
-| # | Screenshot | Caption |
-|---|------------|---------|
-| 1 | ![Dashboard](docs/screenshots/dashboard.png) | **Dashboard View** — Main overview with greeting, 4 stat cards (Total, Completed, Pending, Productivity %), quick actions, recent tasks list, and SVG progress ring |
-| 2 | ![Tasks](docs/screenshots/tasks.png) | **Task Manager** — List view showing all tasks with due dates, estimated focus sessions, priority badges, category labels, edit/delete controls, and progress bar |
-| 3 | ![Search & Filters](docs/screenshots/filters.png) | **Search & Filters** — Real-time filter pipeline searching title and filtering by Priority (High, Medium, Low) and Category (Study, Work, Health, Personal) |
-| 4 | ![Calendar View](docs/screenshots/calendar.png) | **Calendar View** — Monthly scheduler grid with active day highlights, task indicator dots on due dates, and a side-panel detailed daily tasks listing |
-| 5 | ![Pomodoro Timer](docs/screenshots/pomodoro.png) | **Pomodoro Focus Timer** — Custom-designed study timer with total/focus/break timers, nested SVG countdown rings, and system notifications integration |
-| 6 | ![Study Planner & Analytics](docs/screenshots/planner.png) | **Study Planner** — Scheduler engine showcasing auto-generated hourly study blocks, daily study streaks, deadlines tracker, and session checkoff lists |
-| 7 | ![Dark Mode Dashboard](docs/screenshots/dark-mode.png) | **Dark Mode Dashboard** — Gorgeous, high-contrast dark theme optimized for student focus, applying CSS Custom Properties dynamically across components |
-| 8 | ![Mobile View](docs/screenshots/mobile.png) | **Mobile Layout** — Responsive overlay sidebar, collapsible navigation, single-column dashboard cards, and mobile touch-friendly layout |
+### Revealing Module Pattern (IIFE)
+Each module is encapsulated in an Immediately Invoked Function Expression (IIFE), exposing only public methods:
+
+```
+app.js (Bootstrap & Router)
+ ├── utils.js         (Formatting, Toast, Debounce, Escape HTML)
+ ├── storage.js       (Centralized LocalStorage CRUD, Backup/Restore)
+ ├── notifications.js (Web Notifications & Audio Synthesis)
+ ├── taskManager.js   (Task CRUD, Filtering, Form Modal with Presets)
+ ├── dashboard.js     (Workload Stats, Ring Chart, Subject Analytics)
+ ├── calendar.js      (Monthly Grid, Task Due Date Indicators)
+ ├── pomodoro.js      (Timer State Machine, Active Task Sync)
+ └── studyPlanner.js  (Greedy Slot Allocation Scheduling Engine)
+```
+
+### Auto-Scheduling Logic (`studyPlanner.js`)
+Distributes task estimated minutes across days prior to deadline using a greedy first-fit bin-packing algorithm:
+1. Calculates remaining days until deadline ($d$).
+2. Divides total estimated minutes into daily targets.
+3. Scans working hours ($08:00 - 22:00$) for free time slots, enforcing 10-minute break buffers between sessions.
 
 ---
 
-## Architecture
+## Data Storage Schema
 
-### Folder Structure
+All application data is namespace-prefixed with `studyflow_` in `localStorage`:
 
-```
-StudyFlow/
-│
-├── index.html               # SPA shell with sidebar, top bar, pomodoro template
-│
-├── css/
-│   ├── style.css            # Design tokens, layout, buttons, cards, modals, toasts
-│   ├── dashboard.css        # Dashboard stat cards, quick actions, productivity ring
-│   ├── tasks.css            # Task filters, progress bar, task item layout
-│   ├── calendar.css         # Calendar grid, day cells, date selection
-│   └── responsive.css       # Breakpoints: 1024px, 768px, 480px
-│
-├── js/
-│   ├── utils.js             # ID generation, date formatting, toast, debounce, escapeHTML
-│   ├── storage.js           # Centralised localStorage CRUD (tasks, planner, settings)
-│   ├── notifications.js     # Notification API wrapper, settings modal, streak calculator
-│   ├── taskManager.js       # Task CRUD, filtering pipeline, modal form, view sync
-│   ├── dashboard.js         # Dashboard renderer, stat aggregation, ring chart
-│   ├── calendar.js          # Month grid generation, nav, day selection
-│   ├── pomodoro.js          # Timer state machine, SVG animation, localStorage persistence
-│   ├── studyPlanner.js      # Greedy scheduling algorithm, session CRUD, drag support
-│   └── app.js               # Bootstrap, SPA navigation, global search, live clock
-│
-├── .gitignore
-├── LICENSE
-└── README.md
-```
-
-### Design Decisions
-
-| Decision | Rationale |
-|----------|-----------|
-| **Revealing Module Pattern** | Each file is an IIFE returning a public API — zero global variables, enforced encapsulation |
-| **localStorage over IndexedDB** | Simpler API for the data volume (~100 tasks, ~500 sessions); synchronous reads under 10 ms |
-| **CSS Custom Properties** | 30+ design tokens in `:root` — full theme in one place, future dark/light toggle ready |
-| **Inline SVGs** | Zero icon dependencies; every icon is a hand-written inline SVG (no network requests) |
-| **No Build Step** | Open `index.html` and go — maximum simplicity for code review and deployment |
-| **Module Independence** | `typeof` guards let any module work without others; graceful degradation |
-
-### Module Dependency Graph
-
-```
-app.js ────────────────────────────────────────────────────────────── bootstrap
-  ├── utils.js         ← no deps
-  ├── storage.js       ← no deps  
-  ├── notifications.js ← utils.js
-  ├── taskManager.js   ← utils.js, storage.js, app.js (navigation ref)
-  ├── dashboard.js     ← utils.js, taskManager.js (stats), storage.js
-  ├── calendar.js      ← utils.js, storage.js
-  ├── pomodoro.js      ← notifications.js, utils.js
-  └── studyPlanner.js  ← utils.js, storage.js, notifications.js
-```
-
----
-
-## Browser APIs Used
-
-| API | Purpose | Module |
-|-----|---------|--------|
-| **Web Storage (`localStorage`)** | Persist tasks, planner schedule, timer settings, notification preferences | `storage.js`, `notifications.js`, `pomodoro.js` |
-| **Web Notifications** | Send focus/break alerts, daily motivation quotes, deadline reminders | `notifications.js` |
-| **`requestAnimationFrame` / `setInterval`** | Pomodoro countdown tick (1s interval), live clock (1s interval) | `pomodoro.js`, `app.js` |
-| **`Element.closest()`** | Event delegation — detect clicked task item, session, or button from container listeners | `taskManager.js`, `dashboard.js`, `studyPlanner.js` |
-| **`Intl.DateTimeFormat` / `toLocaleDateString`** | Locale-aware date formatting for task due dates, calendar headers | `utils.js`, `calendar.js` |
-| **CSS Custom Properties (`var()`)** | Dynamic theming via JavaScript — phase colour switching in pomodoro rings | `pomodoro.js` |
-
----
-
-## LocalStorage Design
-
-All keys follow the `studyflow_` prefix convention:
-
-| Key | Data | Format |
-|-----|------|--------|
-| `studyflow_tasks` | Array of task objects | `JSON` |
-| `studyflow_planner_schedule` | `{ sessions: [], generatedAt: ISO }` | `JSON` |
-| `studyflow_planner_completed_dates` | Array of date strings (`YYYY-MM-DD`) | `JSON` |
-| `studyflow_notif_settings` | `{ deadlineReminders, pomodoroNotifications, ... }` | `JSON` |
-| `studyflow_notif_permission` | `'granted'` / `'denied'` / `'default'` | String |
-| `studyflow_pomodoro_settings` | `{ totalMinutes, focusMinutes, breakMinutes }` | `JSON` |
-
-Every read is wrapped in `try/catch` for corrupt-data resilience. All writes go through `storage.js` except notification settings (self-contained in `notifications.js`).
-
----
-
-## Key Implementation Highlights
-
-### Auto-Scheduling Algorithm (`studyPlanner.js`)
-
-Distributes estimated study minutes across available days before each task's deadline using a greedy first-fit approach with slot allocation:
-
-```js
-const perDay = Math.min(Math.ceil(totalMin / workingDays), totalMin);
-// For each day, find earliest free slot respecting 08:00–22:00 working hours
-// and 10-minute breaks between sessions
-```
-
-This is algorithmically interesting because it solves a simplified **interval partitioning / bin-packing** problem — similar to what Google Calendar's "Goals" feature does.
-
-### Reactive Data Flow
-
-When a task is created, completed, or deleted, the change propagates without a framework:
-
-```
-TaskManager.showTaskModal() → refreshRelatedViews()
-                                ├── Dashboard.render()    (update stats)
-                                ├── Calendar.render()     (update task dots)
-                                └── StudyPlanner.generateSchedule() (regenerate plan)
-```
-
-### 0-Dependency SVG Charts
-
-The productivity ring is a pure SVG circle driven by `stroke-dasharray` / `stroke-dashoffset`:
-
-```js
-const circumference = 2 * Math.PI * 38;
-const offset = circumference - (pct / 100) * circumference;
-ring.setAttribute('stroke-dasharray', circumference);
-ring.setAttribute('stroke-dashoffset', offset);
-```
-
-### Streak Calculation
-
-The streak calculator walks sorted completed dates backwards from today:
-
-```js
-let checkDate = new Date(today);
-for (const dateStr of sorted) {
-  const d = new Date(dateStr + 'T12:00:00');
-  if (d.getTime() === checkDate.getTime()) { streak++; checkDate.setDate(checkDate.getDate() - 1); }
-  else if (d.getTime() < checkDate.getTime()) break;
-}
-```
-
-### Event Delegation
-
-All modules use `container.addEventListener('click', e => e.target.closest(...))` instead of binding individual listeners — O(n) listeners becomes O(1).
+| Key | Format | Purpose |
+|---|---|---|
+| `studyflow_tasks` | `Array<TaskObject>` | Task details (title, subject, priority, estimatedDuration, studiedMinutes, dueDate, completed) |
+| `studyflow_planner_schedule` | `{ sessions: [], generatedAt: ISO }` | Auto-generated daily study blocks |
+| `studyflow_student_name` | `String` | Student profile name |
+| `studyflow_theme` | `'dark' \| 'light'` | Theme preference |
+| `studyflow_notif_settings` | `JSONObject` | Notification toggles & reminder timing |
+| `studyflow_pomodoro_settings` | `JSONObject` | Custom total, focus, and break minutes |
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
+* Any modern web browser (Chrome, Firefox, Safari, Edge). Zero installation required.
 
-- A modern web browser (Chrome, Firefox, Safari, or Edge)
-
-### Installation
-
+### Local Setup
 ```bash
-# Clone
+# Clone the repository
 git clone https://github.com/ShivShah018/StudyFlow.git
 cd StudyFlow
 
-# Open directly
-start index.html        # Windows
-open index.html         # macOS
-xdg-open index.html     # Linux
-
-# Or serve locally (recommended for Notification API)
+# Serve locally (Recommended for Web Notification API support)
 python -m http.server 8000
-# → http://localhost:8000
+# Open http://localhost:8000 in your browser
 ```
 
 ---
 
-## Usage Guide
+## Key Learning Outcomes
 
-1. **Dashboard** — Landing page with task stats, quick actions, and productivity ring
-2. **Tasks** — Click **Add Task** (or `+` button) to create a task with title, priority, category, estimated duration, and due date
-3. **Calendar** — Navigate months with `<` `>` arrows; click any date to see tasks due that day
-4. **Pomodoro** — Set total/focus/break durations, click **Start** (triggers Notification permission request)
-5. **Planner** — Click **Regenerate** to auto-schedule pending tasks into daily study blocks; click the checkmark to mark a session complete
-6. **Notifications** — Click the bell icon in the sidebar to configure which notification types you receive
-
-**Pro tip:** Press `` Ctrl + K `` anywhere to focus the global search bar.
+* **Modular Vanilla JS Architecture:** Implemented single-page navigation, state reactivity, and cross-module synchronization without external state management libraries.
+* **Algorithmic Problem Solving:** Formulated a greedy bin-packing scheduler with real-world time-window constraints.
+* **Design Systems with CSS Properties:** Structured 30+ design tokens enabling seamless light/dark theme switching and visual consistency.
+* **Browser API Master:** Utilized `localStorage`, Web Notifications API, Web Audio API oscillator synthesis, and Service Worker offline caching.
 
 ---
 
-## What I Learned
+## Resume Representations (SDE vs. UI/UX)
 
-- **SPA architecture without a framework** — Building routing, view management, and cross-module synchronisation in vanilla JS
-- **CSS custom properties for design systems** — Creating 30+ design tokens for consistent theming
-- **localStorage as a data layer** — Wrapping async-like reads with try/catch for resilience
-- **Greedy algorithms in practice** — Implementing a first-fit scheduler with real-world constraints (working hours, breaks, deadlines)
-- **Browser Notification API** — Permission lifecycle, scheduling, preference management
-- **SVG manipulation** — Animated progress rings using stroke properties
-- **Event delegation** — Reducing listener count from N to 1 using `Element.closest()`
+### 1. SDE Resume Version
+> **StudyFlow — Smart Student Productivity Suite** | *Vanilla JS (ES6), HTML5, CSS3, Web Storage API, Service Worker*
+> * Engineered a zero-dependency single-page student productivity suite in modular Vanilla ES6 JavaScript utilizing the Revealing Module Pattern.
+> * Formulated a greedy first-fit auto-scheduling algorithm that partitions task workloads into 50-minute study blocks with 10-minute break buffers within configurable daily working windows.
+> * Implemented task-linked Pomodoro focus tracking, real-time reactive event updates, debounced global search (`Ctrl+K`), JSON data backup/restore capabilities, and Web Notification API integration.
+> * Built a custom CSS variable design system supporting dynamic light/dark theming and responsive layouts down to 375px viewports.
 
 ---
 
-## Future Scope
-
-- [ ] **Drag-and-drop re-scheduling** — Drag planner sessions to different time slots
-- [ ] **Import/export** — JSON backup and restore
-- [ ] **Dark/light theme toggle** — All CSS variables are in place; needs a switcher UI
-- [ ] **PWA support** — Service worker + manifest for offline access and installability
-- [ ] **Cloud sync** — Optional Firebase or REST API sync across devices
+### 2. UI/UX Resume Version
+> **StudyFlow — Student Productivity Hub (UX Case Study & Web Implementation)** | *UX Design, Wireframing, User Flows, CSS Custom Properties, Vanilla JS*
+> * Designed and developed a student-centric study planner focused on reducing cognitive load and administrative setup friction for university undergraduates.
+> * Mapped core user flows (Task Capture, Focus Execution, Course Balance Audit) and designed low/high-fidelity wireframe layouts optimized for academic workflows.
+> * Introduced micro-interaction optimizations including one-tap duration preset chips (`30m`–`120m`) and subject progress visualizers to promote balanced course preparation.
+> * Implemented dual dark/light themes tailored for late-night studying and daytime high-contrast environments while maintaining brand visual hierarchy.
 
 ---
 
 ## License
 
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
-
----
-
-## Connect
-
-**Shivam Shah** — 4th Year Undergraduate  
-[GitHub](https://github.com/ShivShah018) · [LinkedIn](https://www.linkedin.com/in/shivam-shah-00b070284/)
-
----
-
-*Built with vanilla JavaScript, CSS, and HTML — no frameworks, no shortcuts.*
+Distributed under the MIT License. See `LICENSE` for details.

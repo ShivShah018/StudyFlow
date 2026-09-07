@@ -62,24 +62,152 @@ const TaskManager = (() => {
     }
   }
 
+  function getSubjects() { const t = Storage.getTasks(); const s = new Set(['DSA', 'DBMS', 'Operating Systems', 'Web Development', 'Computer Networks']); t.forEach(x => { if (x.subject) s.add(x.subject); }); return Array.from(s); }
+
   function showTaskModal(task = null) {
     const isEdit = task !== null;
     const categories = getCategories();
+    const subjects = getSubjects();
     const overlay = document.createElement('div'); overlay.className = 'modal-overlay active';
-    overlay.innerHTML = `<div class="modal"><div class="modal-header"><h2>${isEdit ? 'Edit Task' : 'New Task'}</h2><button class="modal-close" id="modalClose">&times;</button></div><form id="taskForm"><div class="form-group"><label for="taskTitle">Title</label><input type="text" id="taskTitle" value="${isEdit ? Utils.escapeHTML(task.title) : ''}" required /></div><div class="form-group"><label for="taskDesc">Description</label><textarea id="taskDesc">${isEdit && task.description ? task.description : ''}</textarea></div><div class="form-group"><label for="taskSubject">Subject</label><input type="text" id="taskSubject" placeholder="e.g. Mathematics, DBMS" value="${isEdit && task.subject ? Utils.escapeHTML(task.subject) : ''}" /></div><div class="form-group"><label for="taskPriority">Priority</label><select id="taskPriority"><option value="low" ${isEdit && task.priority === 'low' ? 'selected' : ''}>Low</option><option value="medium" ${!isEdit || task.priority === 'medium' ? 'selected' : ''}>Medium</option><option value="high" ${isEdit && task.priority === 'high' ? 'selected' : ''}>High</option></select></div><div class="form-group"><label for="taskCategory">Category</label><select id="taskCategory">${categories.map(c => `<option value="${c}" ${isEdit && task.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div><div class="form-group"><label for="taskEstDuration">Estimated Study Duration (minutes)</label><input type="number" id="taskEstDuration" placeholder="e.g. 120" min="1" value="${isEdit && task.estimatedDuration ? task.estimatedDuration : ''}" /></div><div class="form-group"><label for="taskDueDate">Due Date</label><input type="date" id="taskDueDate" value="${isEdit && task.dueDate ? task.dueDate : ''}" /></div><div class="form-actions"><button type="button" class="btn btn-secondary" id="modalCancel">Cancel</button><button type="submit" class="btn btn-primary">${isEdit ? 'Update Task' : 'Add Task'}</button></div></form></div>`;
+    const currentEst = isEdit && task.estimatedDuration ? task.estimatedDuration : '';
+    
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <h2>${isEdit ? 'Edit Task' : 'New Study Task'}</h2>
+          <button class="modal-close" id="modalClose">&times;</button>
+        </div>
+        <form id="taskForm" novalidate>
+          <div class="form-group" id="groupTaskTitle">
+            <label for="taskTitle">Task Title <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="taskTitle" value="${isEdit ? Utils.escapeHTML(task.title) : ''}" placeholder="e.g. Solve Dynamic Programming problems" required />
+            <div class="form-error" id="errorTaskTitle">Title is required</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="taskDesc">Description / Notes</label>
+            <textarea id="taskDesc" placeholder="e.g. Focus on 0/1 Knapsack & LCS">${isEdit && task.description ? Utils.escapeHTML(task.description) : ''}</textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="taskSubject">Subject / Course</label>
+            <input type="text" id="taskSubject" list="subjectList" placeholder="e.g. DSA, DBMS, OS" value="${isEdit && task.subject ? Utils.escapeHTML(task.subject) : ''}" />
+            <datalist id="subjectList">
+              ${subjects.map(s => `<option value="${s}"></option>`).join('')}
+            </datalist>
+          </div>
+          
+          <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label for="taskPriority">Priority</label>
+              <select id="taskPriority">
+                <option value="low" ${isEdit && task.priority === 'low' ? 'selected' : ''}>Low</option>
+                <option value="medium" ${!isEdit || task.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                <option value="high" ${isEdit && task.priority === 'high' ? 'selected' : ''}>High</option>
+              </select>
+            </div>
+            <div>
+              <label for="taskCategory">Category</label>
+              <select id="taskCategory">
+                ${categories.map(c => `<option value="${c}" ${isEdit && task.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group" id="groupTaskEst">
+            <label for="taskEstDuration">Estimated Study Time (Minutes)</label>
+            <input type="number" id="taskEstDuration" placeholder="e.g. 60" min="1" max="480" value="${currentEst}" />
+            <div class="preset-chips">
+              ${[30, 45, 60, 90, 120].map(m => `<button type="button" class="preset-chip ${currentEst == m ? 'active' : ''}" data-mins="${m}">${m}m</button>`).join('')}
+            </div>
+            <div class="form-error" id="errorTaskEst">Duration must be between 1 and 480 minutes</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="taskDueDate">Due Date</label>
+            <input type="date" id="taskDueDate" value="${isEdit && task.dueDate ? task.dueDate : ''}" />
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="modalCancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">${isEdit ? 'Save Changes' : 'Create Task'}</button>
+          </div>
+        </form>
+      </div>`;
+      
     document.body.appendChild(overlay);
     const close = () => overlay.remove();
     document.getElementById('modalClose').addEventListener('click', close);
     document.getElementById('modalCancel').addEventListener('click', close);
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+    // Handle duration preset clicks
+    const estInput = document.getElementById('taskEstDuration');
+    overlay.querySelectorAll('.preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        overlay.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        estInput.value = chip.dataset.mins;
+      });
+    });
+
+    // Handle form submission with inline validation
     document.getElementById('taskForm').addEventListener('submit', e => {
       e.preventDefault();
-      const title = document.getElementById('taskTitle').value.trim();
-      if (!title) return;
-      const est = document.getElementById('taskEstDuration').value;
-      const data = { title, description: document.getElementById('taskDesc').value.trim(), subject: document.getElementById('taskSubject').value.trim(), priority: document.getElementById('taskPriority').value, category: document.getElementById('taskCategory').value, estimatedDuration: est ? parseInt(est) : null, dueDate: document.getElementById('taskDueDate').value || null };
-      if (isEdit) { Storage.updateTask(task.id, data); Utils.showToast('Task updated', 'success'); } else { data.id = Utils.generateId(); data.completed = false; data.createdAt = new Date().toISOString(); data.completedAt = null; Storage.addTask(data); Utils.showToast('Task added', 'success'); }
-      overlay.remove(); renderPage(); refreshRelatedViews();
+      let isValid = true;
+      
+      const titleInput = document.getElementById('taskTitle');
+      const titleGroup = document.getElementById('groupTaskTitle');
+      const title = titleInput.value.trim();
+      
+      if (!title) {
+        titleGroup.classList.add('has-error');
+        isValid = false;
+      } else {
+        titleGroup.classList.remove('has-error');
+      }
+
+      const estVal = estInput.value.trim();
+      const estGroup = document.getElementById('groupTaskEst');
+      let estNum = null;
+      if (estVal) {
+        estNum = parseInt(estVal);
+        if (isNaN(estNum) || estNum <= 0 || estNum > 480) {
+          estGroup.classList.add('has-error');
+          isValid = false;
+        } else {
+          estGroup.classList.remove('has-error');
+        }
+      } else {
+        estGroup.classList.remove('has-error');
+      }
+
+      if (!isValid) return;
+
+      const data = {
+        title,
+        description: document.getElementById('taskDesc').value.trim(),
+        subject: document.getElementById('taskSubject').value.trim(),
+        priority: document.getElementById('taskPriority').value,
+        category: document.getElementById('taskCategory').value,
+        estimatedDuration: estNum,
+        dueDate: document.getElementById('taskDueDate').value || null
+      };
+
+      if (isEdit) {
+        Storage.updateTask(task.id, data);
+        Utils.showToast('Task updated successfully', 'success');
+      } else {
+        data.id = Utils.generateId();
+        data.completed = false;
+        data.createdAt = new Date().toISOString();
+        data.completedAt = null;
+        Storage.addTask(data);
+        Utils.showToast('Task created successfully', 'success');
+      }
+      overlay.remove();
+      renderPage();
+      refreshRelatedViews();
     });
   }
 

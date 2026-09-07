@@ -1,17 +1,36 @@
 const Dashboard = (() => {
   function init() { render(); }
 
+  function getSubjectStats() {
+    const tasks = Storage.getTasks();
+    const map = {};
+    tasks.forEach(t => {
+      const subj = t.subject ? t.subject.trim() : (t.category ? t.category.trim() : 'General');
+      if (!map[subj]) map[subj] = { total: 0, completed: 0, studiedMinutes: 0 };
+      map[subj].total += 1;
+      if (t.completed) map[subj].completed += 1;
+      map[subj].studiedMinutes += (t.studiedMinutes || 0);
+    });
+    return Object.keys(map).map(subj => {
+      const { total, completed, studiedMinutes } = map[subj];
+      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+      return { subject: subj, total, completed, studiedMinutes, pct };
+    }).sort((a, b) => b.total - a.total);
+  }
+
   function render() {
     const container = document.getElementById('page-dashboard');
     const stats = TaskManager.getStats();
+    const subjectStats = getSubjectStats();
     const greeting = Utils.getGreeting();
+    const studentName = Storage.getStudentName ? Storage.getStudentName() : 'Student';
     const todayDisplay = Utils.getTodayDisplay();
     const recentTasks = Storage.getTasks().filter(t => !t.completed).slice(0, 5);
     const circumference = 2 * Math.PI * 38;
     const offset = circumference - (stats.pct / 100) * circumference;
 
     container.innerHTML = `
-      <div class="dashboard-welcome"><h2>${greeting}, Student!</h2><p class="welcome-subtitle">${todayDisplay}</p></div>
+      <div class="dashboard-welcome"><h2>${greeting}, ${Utils.escapeHTML(studentName)}!</h2><p class="welcome-subtitle">${todayDisplay}</p></div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-icon blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="stat-info"><h4>Total Tasks</h4><div class="stat-value">${stats.total}</div></div></div>
         <div class="stat-card"><div class="stat-icon green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div class="stat-info"><h4>Completed</h4><div class="stat-value">${stats.completed}</div></div></div>
@@ -26,8 +45,42 @@ const Dashboard = (() => {
         <button class="quick-action-btn" data-action="goToCalendar"><span class="qa-icon" style="background:var(--success-light);color:var(--success);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>View Calendar</button>
       </div></div>
       <div class="dashboard-bottom">
-        <div class="glass-card"><h3><span>Recent Tasks</span><button class="btn btn-sm btn-secondary" data-action="goToTasks">View All</button></h3>${recentTasks.length === 0 ? '<div class="upcoming-empty">No pending tasks. Great job!</div>' : recentTasks.map(t => `<div class="recent-task-item"><div class="recent-task-check" data-id="${t.id}"></div><div class="recent-task-info"><div class="task-title">${t.title}</div><div class="task-meta"><span class="badge badge-${t.priority||'medium'}">${Utils.capitalize(t.priority||'medium')}</span>${t.category ? `<span class="task-category">${t.category}</span>` : ''}</div></div></div>`).join('')}</div>
-        <div class="glass-card"><h3>Productivity Overview</h3><div class="productivity-ring"><div class="ring-container"><svg width="100" height="100" viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="38"/><circle class="ring-progress" cx="50" cy="50" r="38" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/></svg><div class="ring-label"><span class="pct">${stats.pct}%</span><span class="pct-label">Done</span></div></div><div class="ring-stats"><div class="ring-stat"><span class="ring-stat-dot" style="background:var(--accent)"></span>Completed: <strong>${stats.completed}</strong></div><div class="ring-stat"><span class="ring-stat-dot" style="background:var(--warning)"></span>Pending: <strong>${stats.pending}</strong></div><div class="ring-stat"><span class="ring-stat-dot" style="background:var(--border-color)"></span>Total: <strong>${stats.total}</strong></div></div></div></div>
+        <div class="glass-card">
+          <h3><span>Recent Tasks</span><button class="btn btn-sm btn-secondary" data-action="goToTasks">View All</button></h3>
+          ${recentTasks.length === 0 ? '<div class="upcoming-empty">No pending tasks. Great job!</div>' : recentTasks.map(t => `<div class="recent-task-item"><div class="recent-task-check" data-id="${t.id}"></div><div class="recent-task-info"><div class="task-title">${t.title}</div><div class="task-meta"><span class="badge badge-${t.priority||'medium'}">${Utils.capitalize(t.priority||'medium')}</span>${t.category ? `<span class="task-category">${t.category}</span>` : ''}${t.subject ? `<span class="task-category" style="background:var(--accent-light);color:var(--accent);">${Utils.escapeHTML(t.subject)}</span>` : ''}</div></div></div>`).join('')}
+        </div>
+        <div class="glass-card">
+          <h3>Productivity Overview</h3>
+          <div class="productivity-ring">
+            <div class="ring-container"><svg width="100" height="100" viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="38"/><circle class="ring-progress" cx="50" cy="50" r="38" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/></svg><div class="ring-label"><span class="pct">${stats.pct}%</span><span class="pct-label">Done</span></div></div>
+            <div class="ring-stats"><div class="ring-stat"><span class="ring-stat-dot" style="background:var(--accent)"></span>Completed: <strong>${stats.completed}</strong></div><div class="ring-stat"><span class="ring-stat-dot" style="background:var(--warning)"></span>Pending: <strong>${stats.pending}</strong></div><div class="ring-stat"><span class="ring-stat-dot" style="background:var(--border-color)"></span>Total: <strong>${stats.total}</strong></div></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="dashboard-bottom" style="margin-top:20px;">
+        <div class="glass-card" style="grid-column: 1 / -1;">
+          <h3 style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Subject Progress Analytics</span>
+            <span style="font-size:12px;font-weight:500;color:var(--text-secondary);">${subjectStats.length} Subject(s) Tracked</span>
+          </h3>
+          ${subjectStats.length === 0 ? '<div class="upcoming-empty">Add tasks with subjects to see progress analytics</div>' : `
+            <div class="subject-progress-grid">
+              ${subjectStats.map(s => `
+                <div class="subject-item">
+                  <div class="subject-item-header">
+                    <span>${Utils.escapeHTML(s.subject)}</span>
+                    <span>${s.completed}/${s.total} done (${s.pct}%)</span>
+                  </div>
+                  <div class="subject-progress-track">
+                    <div class="subject-progress-fill" style="width: ${s.pct}%;"></div>
+                  </div>
+                  <div class="subject-item-meta">${s.studiedMinutes > 0 ? `${s.studiedMinutes} min studied` : 'No study time logged yet'}</div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
       </div>`;
     bindEvents();
   }

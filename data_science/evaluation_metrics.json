@@ -14,52 +14,97 @@
     "class_hours_today"
   ],
   "classification_metrics": {
-    "LogisticRegression": {
-      "accuracy": 0.6929,
-      "precision": 0.6929,
-      "recall": 1.0,
-      "f1_score": 0.8186,
-      "roc_auc": 0.5804,
+    "DummyBaseline": {
+      "accuracy": 0.57,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "roc_auc": 0.5,
       "confusion_matrix": [
         [
-          0,
-          215
+          399,
+          0
         ],
         [
-          0,
-          485
+          301,
+          0
+        ]
+      ]
+    },
+    "LogisticRegression": {
+      "accuracy": 0.7171,
+      "precision": 0.6575,
+      "recall": 0.7143,
+      "f1_score": 0.6847,
+      "roc_auc": 0.794,
+      "brier_score": 0.1868,
+      "confusion_matrix": [
+        [
+          287,
+          112
+        ],
+        [
+          86,
+          215
         ]
       ]
     },
     "RandomForestClassifier": {
-      "accuracy": 0.6943,
-      "precision": 0.6938,
-      "recall": 1.0,
-      "f1_score": 0.8193,
-      "roc_auc": 0.58
+      "accuracy": 0.7071,
+      "precision": 0.6429,
+      "recall": 0.7176,
+      "f1_score": 0.6782,
+      "roc_auc": 0.7987,
+      "brier_score": 0.1858,
+      "confusion_matrix": [
+        [
+          279,
+          120
+        ],
+        [
+          85,
+          216
+        ]
+      ]
     }
   },
   "regression_metrics": {
+    "MeanBaseline": {
+      "rmse": 77.57,
+      "mae": 59.54,
+      "r2_score": -0.0001
+    },
     "RidgeRegression": {
-      "rmse": 20.7,
-      "mae": 14.15,
-      "r2_score": 0.9377
+      "rmse": 15.1,
+      "mae": 9.96,
+      "r2_score": 0.9621
     },
     "GradientBoostingRegressor": {
-      "rmse": 21.71,
-      "mae": 14.26,
-      "r2_score": 0.9315
+      "rmse": 15.08,
+      "mae": 9.73,
+      "r2_score": 0.9622
     }
   },
-  "feature_importance_rf": {
-    "subject_difficulty": 0.0956,
-    "priority_code": 0.0381,
-    "estimated_duration": 0.0727,
-    "days_until_due": 0.1185,
-    "subtask_count": 0.0677,
-    "student_study_streak": 0.0957,
-    "hist_completion_rate": 0.2908,
-    "past_studied_minutes": 0.1537,
-    "class_hours_today": 0.0671
+  "permutation_importance": {
+    "subject_difficulty": 0.015,
+    "priority_code": 0.0137,
+    "estimated_duration": 0.0432,
+    "days_until_due": 0.0782,
+    "subtask_count": 0.0153,
+    "student_study_streak": 0.0015,
+    "hist_completion_rate": 0.0471,
+    "past_studied_minutes": 0.0357,
+    "class_hours_today": 0.0245
+  },
+  "odds_ratios": {
+    "subject_difficulty": 0.7304,
+    "priority_code": 1.3322,
+    "estimated_duration": 0.5332,
+    "days_until_due": 2.0806,
+    "subtask_count": 0.736,
+    "student_study_streak": 1.1384,
+    "hist_completion_rate": 1.9209,
+    "past_studied_minutes": 1.7245,
+    "class_hours_today": 0.6682
   }
 }

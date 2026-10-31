@@ -59,6 +59,16 @@ const BackupService = (() => {
               <button class="btn btn-sm btn-secondary" id="bkConfirmMergeBtn" style="flex:1;">Merge with Existing</button>
             </div>
           </div>
+
+          <div style="border-top:1px solid var(--border-color);padding-top:14px;">
+            <h4 style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:4px;">Safety & Recovery Rollback</h4>
+            <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
+              Restore the automatic safety snapshot captured prior to schema migration.
+            </p>
+            <button class="btn btn-sm btn-secondary" id="bkRollbackSnapshotBtn" style="width:100%;border-color:var(--warning);color:var(--warning);">
+              Rollback to Safety Snapshot
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -126,6 +136,19 @@ const BackupService = (() => {
       Utils.showToast('Data merged successfully', 'success');
       close();
       window.location.reload();
+    });
+
+    document.getElementById('bkRollbackSnapshotBtn')?.addEventListener('click', () => {
+      if (confirm('Rollback to initial automatic safety snapshot? This will restore original state before schema migrations.')) {
+        const res = Storage.restoreAutoSnapshot ? Storage.restoreAutoSnapshot() : { success: false, error: 'Not supported' };
+        if (res.success) {
+          Utils.showToast('Snapshot restored! Reloading...', 'success');
+          close();
+          window.location.reload();
+        } else {
+          Utils.showToast('Rollback failed: ' + res.error, 'error');
+        }
+      }
     });
   }
 

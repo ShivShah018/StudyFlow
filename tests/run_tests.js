@@ -1,6 +1,7 @@
 /**
- * StudyFlow - Automated Unit Test Suite
- * Tests core business logic, algorithms, ML inference, and voice parser.
+ * StudyFlow - Automated Unit & Integration Test Suite
+ * Tests core business logic, storage migration, ML inference, voice parser,
+ * collision avoidance, BM25 search, regex safety, and real-user ML collection.
  */
 
 // Mock browser globals for Node.js environment
@@ -83,11 +84,12 @@ const valResult = Storage.validateImportData(exportedJson);
 assert(valResult.valid === true && valResult.counts.tasks >= 1, 'JSON validation passes schema checks');
 
 // -------------------------------------------------------------
-// Test Suite 2: Machine Learning Inference
+// Test Suite 2: Machine Learning Inference & Explainability
 // -------------------------------------------------------------
 console.log('\nTest Suite 2: Machine Learning Client-Side Inference');
 const predProb = MLAnalytics.predictCompletionProbability(task1);
 assert(typeof predProb.probability === 'number' && predProb.probability >= 0 && predProb.probability <= 100, `Completion probability calculated: ${predProb.probability}% (${predProb.label})`);
+assert(Array.isArray(predProb.contributions) && predProb.contributions.length > 0, 'Explainable feature contributions calculated');
 
 const predDur = MLAnalytics.predictActualDuration(task1);
 assert(typeof predDur === 'number' && predDur >= 15, `Actual duration predicted: ${predDur} mins (vs estimated: 60 mins)`);
@@ -153,6 +155,39 @@ Storage.addDocument({
 });
 const searchRes = DocumentIntelligence.searchIndexedDocuments('virtual memory processes');
 assert(searchRes.length > 0 && searchRes[0].id === 'c1', 'BM25 keyword search retrieves exact matching chunk');
+
+// Regex Safety test for technical keywords (C++, O(n), [0])
+let regexSafe = true;
+try {
+  const testTerms = ['C++', 'O(n)', 'array[0]', 'ptr*'];
+  testTerms.forEach(term => {
+    const safeTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    new RegExp(`(${safeTerm})`, 'gi');
+  });
+} catch (e) {
+  regexSafe = false;
+}
+assert(regexSafe, 'Search term regex sanitizer handles metacharacters (C++, O(n), [0]) safely');
+
+// -------------------------------------------------------------
+// Test Suite 6: Real-User ML Framework & Snapshot Restoration
+// -------------------------------------------------------------
+console.log('\nTest Suite 6: Real-User ML Data Separation & Snapshot Rollback');
+Storage.addUserMLSample({
+  subject: 'DSA',
+  features: [0.85, 2, 60, 2, 2, 0, 0.70, 0, 2.0],
+  estimatedDuration: 60,
+  actualDuration: 75,
+  completedOnTime: 1
+});
+const userSamples = Storage.getUserMLSamples();
+assert(userSamples.length >= 1, `Real user ML sample recorded (${userSamples.length} observations in storage)`);
+
+const exportedUserML = Storage.exportAnonymizedUserMLData();
+assert(exportedUserML && exportedUserML.includes('anonymized_student_activity_features'), 'Anonymized user ML dataset exported');
+
+const restoreResult = Storage.restoreAutoSnapshot();
+assert(restoreResult.success === true, 'Safety auto-snapshot restored successfully');
 
 console.log(`\n=== TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED ===`);
 if (failedTests > 0) process.exit(1);

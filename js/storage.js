@@ -92,6 +92,39 @@ const Storage = (() => {
       spawnNextRecurringTask(task);
     }
 
+    // Record Real-User ML training sample upon completion
+    if (task.completed) {
+      try {
+        const onTime = task.dueDate && typeof Utils !== 'undefined' ? !Utils.isOverdue(task.dueDate) : true;
+        const est = parseInt(task.estimatedDuration) || 60;
+        const actual = task.studiedMinutes || task.actualDuration || est;
+        const diffMap = { 'DSA': 0.85, 'Operating Systems': 0.80, 'Computer Networks': 0.75, 'Mathematics': 0.70, 'DBMS': 0.60, 'Web Development': 0.50 };
+        const subj = task.subject || task.category || 'General';
+        const diff = diffMap[subj] || 0.60;
+        const pCode = task.priority === 'high' ? 2 : (task.priority === 'medium' ? 1 : 0);
+        
+        addUserMLSample({
+          subject: subj,
+          features: [
+            diff,
+            pCode,
+            est,
+            task.dueDate && typeof Utils !== 'undefined' ? Math.max(0, Utils.daysUntil(task.dueDate) === 'Today' ? 0 : 2) : 3,
+            Array.isArray(task.subtasks) ? task.subtasks.length : 0,
+            0,
+            0.75,
+            task.studiedMinutes || 0,
+            0
+          ],
+          estimatedDuration: est,
+          actualDuration: actual,
+          completedOnTime: onTime ? 1 : 0
+        });
+      } catch (err) {
+        console.warn('Could not record user ML sample:', err);
+      }
+    }
+
     saveTasks(t);
     return task;
   }
@@ -290,14 +323,23 @@ const Storage = (() => {
   }
 
   function saveDocuments(docs) {
-    localStorage.setItem('studyflow_documents', JSON.stringify(docs));
+    try {
+      localStorage.setItem('studyflow_documents', JSON.stringify(docs));
+      return true;
+    } catch (e) {
+      console.error('Storage quota exceeded while saving documents:', e);
+      if (typeof Utils !== 'undefined') {
+        Utils.showToast('Storage limit reached! Please delete older documents or shorten text.', 'error');
+      }
+      return false;
+    }
   }
 
   function addDocument(doc) {
     const docs = getDocuments();
     docs.push(doc);
-    saveDocuments(docs);
-    return doc;
+    const success = saveDocuments(docs);
+    return success ? doc : null;
   }
 
   function deleteDocument(id) {
@@ -305,6 +347,74 @@ const Storage = (() => {
     const filtered = docs.filter(d => d.id !== id);
     saveDocuments(filtered);
     return filtered;
+  }
+
+  // --- Real-User Machine Learning Validation Framework ---
+  function getUserMLSamples() {
+    try {
+      const d = localStorage.getItem('studyflow_user_ml_samples');
+      return d ? JSON.parse(d) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveUserMLSamples(samples) {
+    try {
+      localStorage.setItem('studyflow_user_ml_samples', JSON.stringify(samples));
+    } catch (e) {
+      console.warn('Failed to save user ML samples:', e);
+    }
+  }
+
+  function addUserMLSample(sample) {
+    const list = getUserMLSamples();
+    list.push({
+      id: 'sample_' + Date.now().toString(36),
+      recordedAt: new Date().toISOString(),
+      ...sample
+    });
+    // Cap at 500 recent real-user observations to preserve localStorage quota
+    if (list.length > 500) list.shift();
+    saveUserMLSamples(list);
+  }
+
+  function clearUserMLSamples() {
+    localStorage.removeItem('studyflow_user_ml_samples');
+  }
+
+  function exportAnonymizedUserMLData() {
+    const samples = getUserMLSamples();
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      totalSamples: samples.length,
+      dataType: 'anonymized_student_activity_features',
+      privacyNotice: 'Contains only mathematical workload features. No personal names or account details.',
+      features: [
+        'subject_difficulty', 'priority_code', 'estimated_duration', 'days_until_due',
+        'subtask_count', 'student_study_streak', 'hist_completion_rate', 'past_studied_minutes',
+        'class_hours_today'
+      ],
+      samples
+    };
+    return JSON.stringify(payload, null, 2);
+  }
+
+  // Restore emergency auto-snapshot
+  function restoreAutoSnapshot() {
+    try {
+      const snap = localStorage.getItem('studyflow_auto_snapshot_v1');
+      if (!snap) return { success: false, error: 'No safety snapshot found' };
+      const parsed = JSON.parse(snap);
+      if (!parsed.keys) return { success: false, error: 'Snapshot payload is malformed' };
+      
+      Object.keys(parsed.keys).forEach(k => {
+        localStorage.setItem(k, parsed.keys[k]);
+      });
+      return { success: true, createdAt: parsed.createdAt };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
   }
 
   // --- JSON Data Backup, Import & Schema Validation ---
@@ -442,6 +552,12 @@ const Storage = (() => {
     // Backup & Restore
     exportAllDataJSON,
     validateImportData,
-    importAllData
+    importAllData,
+    restoreAutoSnapshot,
+    // Real-User Machine Learning Framework
+    getUserMLSamples,
+    addUserMLSample,
+    clearUserMLSamples,
+    exportAnonymizedUserMLData
   };
 })();

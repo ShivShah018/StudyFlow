@@ -1,6 +1,6 @@
 const CACHE = 'studyflow-v2';
 const ASSETS = [
-  '/', 'index.html',
+  './', 'index.html',
   'css/style.css', 'css/dashboard.css', 'css/tasks.css', 'css/calendar.css', 'css/responsive.css',
   'js/utils.js', 'js/mlModelsData.js', 'js/storage.js', 'js/notifications.js', 'js/backupService.js',
   'js/timetable.js', 'js/voiceSpeech.js', 'js/voiceParser.js', 'js/voiceHandler.js',

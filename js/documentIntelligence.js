@@ -244,8 +244,15 @@ const DocumentIntelligence = (() => {
     if (!terms || terms.length === 0) return text;
     let res = text;
     terms.forEach(term => {
-      const reg = new RegExp(`(${term})`, 'gi');
-      res = res.replace(reg, '<mark style="background:rgba(99,102,241,0.25);color:var(--accent);padding:0 2px;border-radius:2px;">$1</mark>');
+      if (!term || typeof term !== 'string') return;
+      // Sanitize special regex metacharacters to prevent SyntaxError (e.g. C++, O(n), [0])
+      const safeTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      try {
+        const reg = new RegExp(`(${safeTerm})`, 'gi');
+        res = res.replace(reg, '<mark style="background:rgba(99,102,241,0.25);color:var(--accent);padding:0 2px;border-radius:2px;">$1</mark>');
+      } catch (e) {
+        console.warn('Regex highlight error for term:', term, e);
+      }
     });
     return res;
   }
@@ -262,11 +269,12 @@ const DocumentIntelligence = (() => {
         <form id="uploadDocForm">
           <div class="form-group">
             <label for="docTitle">Document Name / Course Syllabus <span style="color:var(--danger)">*</span></label>
-            <input type="text" id="docTitle" placeholder="e.g. OS Unit 3: Virtual Memory Notes" required />
+            <input type="text" id="docTitle" placeholder="e.g. OS Unit 3: Virtual Memory Notes" required maxlength="80" />
           </div>
           <div class="form-group">
             <label for="docText">Paste Course Text / Syllabus / Lecture Notes <span style="color:var(--danger)">*</span></label>
-            <textarea id="docText" placeholder="Paste textbook definitions, lecture transcripts, or assignment specifications here..." style="min-height:140px;" required></textarea>
+            <textarea id="docText" placeholder="Paste textbook definitions, lecture transcripts, or assignment specifications here..." style="min-height:140px;" maxlength="50000" required></textarea>
+            <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Maximum 50,000 characters per document to safeguard local browser storage.</div>
           </div>
           <div class="form-actions">
             <button type="button" class="btn btn-secondary" id="docModalCancel">Cancel</button>
@@ -288,19 +296,26 @@ const DocumentIntelligence = (() => {
       const text = document.getElementById('docText').value.trim();
       if (!name || !text) return;
 
+      if (text.length > 50000) {
+        Utils.showToast('Document exceeds 50,000 character quota. Please trim or split.', 'error');
+        return;
+      }
+
       const docId = 'doc_' + Date.now().toString(36);
       const chunks = chunkDocumentText(text, docId, name);
 
-      Storage.addDocument({
+      const added = Storage.addDocument({
         id: docId,
         name,
         uploadDate: Utils.getTodayStr(),
         chunks
       });
 
-      Utils.showToast(`Indexed ${chunks.length} chunks from "${name}"`, 'success');
-      close();
-      render();
+      if (added) {
+        Utils.showToast(`Indexed ${chunks.length} chunks from "${name}"`, 'success');
+        close();
+        render();
+      }
     });
   }
 

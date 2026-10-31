@@ -350,23 +350,27 @@ const Timetable = (() => {
     document.getElementById('addClassBtn')?.addEventListener('click', showAddClassModal);
     document.getElementById('addTopicBtn')?.addEventListener('click', showAddTopicModal);
 
-    container.querySelectorAll('.delete-class-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    // Event delegation on container for dynamic elements
+    container.addEventListener('click', (e) => {
+      const delBtn = e.target.closest('.delete-class-btn');
+      if (delBtn) {
         e.stopPropagation();
-        const id = btn.dataset.id;
+        const id = delBtn.dataset.id;
         if (confirm('Remove this class from timetable?')) {
           Storage.deleteTimetableClass(id);
           Utils.showToast('Class removed', 'info');
           render();
           if (typeof StudyPlanner !== 'undefined') StudyPlanner.generateSchedule();
         }
-      });
-    });
+        return;
+      }
 
-    container.querySelectorAll('.revise-topic-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        handleReviseTopic(btn.dataset.id);
-      });
+      const revBtn = e.target.closest('.revise-topic-btn');
+      if (revBtn) {
+        e.stopPropagation();
+        handleReviseTopic(revBtn.dataset.id);
+        return;
+      }
     });
   }
 

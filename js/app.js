@@ -1,16 +1,47 @@
 const App = (() => {
   const PAGES = ['dashboard', 'tasks', 'calendar', 'pomodoro', 'planner', 'analytics', 'timetable', 'documents'];
+  let isInitialized = false;
 
   function init() {
-    initTheme();
+    if (isInitialized) return;
+    isInitialized = true;
+
+    try {
+      initTheme();
+    } catch (e) {
+      console.warn('Theme init notice:', e);
+    }
+
+    try {
+      startClock();
+      updateTopBarDate();
+      updateStudentNameDisplay();
+    } catch (e) {
+      console.warn('Top bar clock/date init notice:', e);
+    }
+
+    // 1. Bind global shell & navigation events FIRST so all buttons and links are interactive
+    try {
+      bindGlobalEvents();
+    } catch (e) {
+      console.error('Error binding global events:', e);
+    }
+
+    // 2. Initialize application modules with strict isolation
     initModules();
-    startClock();
-    updateTopBarDate();
-    updateStudentNameDisplay();
-    bindGlobalEvents();
-    navigate('dashboard');
+
+    // 3. Navigate to initial dashboard view
+    try {
+      navigate('dashboard');
+    } catch (e) {
+      console.error('Error during initial dashboard navigation:', e);
+    }
+
+    // 4. Register service worker using relative path for GitHub Pages compatibility
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker.register('./sw.js').catch((err) => {
+        console.warn('Service Worker registration skipped:', err);
+      });
     }
   }
 
@@ -78,7 +109,7 @@ const App = (() => {
       if (val && Storage.setStudentName) {
         Storage.setStudentName(val);
         updateStudentNameDisplay();
-        Dashboard.render();
+        if (typeof Dashboard !== 'undefined') Dashboard.render();
         Utils.showToast('Profile updated', 'success');
       }
       close();
@@ -86,16 +117,26 @@ const App = (() => {
   }
 
   function initModules() {
-    Dashboard.init();
-    TaskManager.init();
-    Calendar.init();
-    Pomodoro.init();
-    StudyPlanner.init();
-    if (typeof Timetable !== 'undefined') Timetable.init();
-    if (typeof MLAnalytics !== 'undefined') MLAnalytics.init();
-    if (typeof DocumentIntelligence !== 'undefined') DocumentIntelligence.init();
-    if (typeof VoiceHandler !== 'undefined') VoiceHandler.init();
-    if (typeof Notifications !== 'undefined') Notifications.init();
+    const moduleList = [
+      { name: 'Dashboard', fn: () => typeof Dashboard !== 'undefined' && Dashboard.init() },
+      { name: 'TaskManager', fn: () => typeof TaskManager !== 'undefined' && TaskManager.init() },
+      { name: 'Calendar', fn: () => typeof Calendar !== 'undefined' && Calendar.init() },
+      { name: 'Pomodoro', fn: () => typeof Pomodoro !== 'undefined' && Pomodoro.init() },
+      { name: 'StudyPlanner', fn: () => typeof StudyPlanner !== 'undefined' && StudyPlanner.init() },
+      { name: 'Timetable', fn: () => typeof Timetable !== 'undefined' && Timetable.init() },
+      { name: 'MLAnalytics', fn: () => typeof MLAnalytics !== 'undefined' && MLAnalytics.init() },
+      { name: 'DocumentIntelligence', fn: () => typeof DocumentIntelligence !== 'undefined' && DocumentIntelligence.init() },
+      { name: 'VoiceHandler', fn: () => typeof VoiceHandler !== 'undefined' && VoiceHandler.init() },
+      { name: 'Notifications', fn: () => typeof Notifications !== 'undefined' && Notifications.init() }
+    ];
+
+    moduleList.forEach(m => {
+      try {
+        m.fn();
+      } catch (err) {
+        console.error(`[StudyFlow] Failed to initialize module ${m.name}:`, err);
+      }
+    });
   }
 
   function navigate(page) {
@@ -108,14 +149,21 @@ const App = (() => {
       item.classList.toggle('active', item.dataset.page === page);
     });
 
-    if (page === 'dashboard') Dashboard.render();
-    if (page === 'tasks') TaskManager.renderPage();
-    if (page === 'calendar') Calendar.render();
-    if (page === 'pomodoro' && typeof Pomodoro !== 'undefined') Pomodoro.renderFocusStats();
-    if (page === 'planner') StudyPlanner.render();
-    if (page === 'analytics' && typeof MLAnalytics !== 'undefined') MLAnalytics.render();
-    if (page === 'timetable' && typeof Timetable !== 'undefined') Timetable.render();
-    if (page === 'documents' && typeof DocumentIntelligence !== 'undefined') DocumentIntelligence.render();
+    try {
+      if (page === 'dashboard' && typeof Dashboard !== 'undefined') Dashboard.render();
+      if (page === 'tasks' && typeof TaskManager !== 'undefined') TaskManager.renderPage();
+      if (page === 'calendar' && typeof Calendar !== 'undefined') Calendar.render();
+      if (page === 'pomodoro' && typeof Pomodoro !== 'undefined') {
+        Pomodoro.renderFocusStats();
+        if (typeof Pomodoro.updateDisplay === 'function') Pomodoro.updateDisplay();
+      }
+      if (page === 'planner' && typeof StudyPlanner !== 'undefined') StudyPlanner.render();
+      if (page === 'analytics' && typeof MLAnalytics !== 'undefined') MLAnalytics.render();
+      if (page === 'timetable' && typeof Timetable !== 'undefined') Timetable.render();
+      if (page === 'documents' && typeof DocumentIntelligence !== 'undefined') DocumentIntelligence.render();
+    } catch (err) {
+      console.error(`[StudyFlow] Error rendering page "${page}":`, err);
+    }
 
     closeMobileSidebar();
   }
@@ -142,12 +190,34 @@ const App = (() => {
   }
 
   function bindGlobalEvents() {
+    // 1. Sidebar navigation with event delegation
+    const sidebarNav = document.querySelector('.sidebar-nav');
+    if (sidebarNav) {
+      sidebarNav.addEventListener('click', e => {
+        const item = e.target.closest('.nav-item[data-page]');
+        if (item) {
+          e.preventDefault();
+          navigate(item.dataset.page);
+        }
+      });
+    }
+
+    // Direct event listener fallback for all navigation links
     document.querySelectorAll('.nav-item[data-page]').forEach(item => {
-      item.addEventListener('click', e => { e.preventDefault(); navigate(item.dataset.page); });
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        navigate(item.dataset.page);
+      });
     });
-    document.getElementById('sidebarToggle')?.addEventListener('click', () => document.getElementById('sidebar').classList.toggle('collapsed'));
+
+    // 2. Sidebar and mobile controls
+    document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+      document.getElementById('sidebar')?.classList.toggle('collapsed');
+    });
+
     document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
       const sidebar = document.getElementById('sidebar');
+      if (!sidebar) return;
       sidebar.classList.toggle('mobile-open');
       let overlay = document.querySelector('.sidebar-overlay');
       if (!overlay) {
@@ -159,37 +229,53 @@ const App = (() => {
       overlay.classList.toggle('active');
     });
 
+    // 3. Theme Toggle
     document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
+
+    // 4. Student Profile Modal
     document.getElementById('profileEditBtn')?.addEventListener('click', showProfileModal);
+
+    // 5. Notifications Settings
     document.getElementById('notifSettingsBtn')?.addEventListener('click', () => {
-      if (typeof Notifications !== 'undefined') Notifications.renderSettingsModal();
+      if (typeof Notifications !== 'undefined' && typeof Notifications.renderSettingsModal === 'function') {
+        Notifications.renderSettingsModal();
+      }
     });
 
-    // Voice Assistant trigger button in top bar
+    // 6. Voice Assistant Trigger
     document.getElementById('voiceAssistantBtn')?.addEventListener('click', () => {
       if (typeof VoiceHandler !== 'undefined') {
         VoiceHandler.triggerVoiceListening();
+      } else {
+        Utils.showToast('Voice Assistant module is initializing...', 'info');
       }
     });
 
-    // Backup & Restore button in sidebar footer
+    // 7. Backup & Restore
     document.getElementById('backupRestoreBtn')?.addEventListener('click', () => {
       if (typeof BackupService !== 'undefined') {
         BackupService.showBackupModal();
+      } else {
+        Utils.showToast('Backup Service module is initializing...', 'info');
       }
     });
 
+    // 8. Global Search
     document.getElementById('globalSearch')?.addEventListener('input', Utils.debounce(e => {
       const q = e.target.value.trim();
       const activePage = document.querySelector('.page.active');
       const pageId = activePage?.id.replace('page-', '');
       if (pageId === 'tasks') {
-        TaskManager.setGlobalSearch(q);
-        TaskManager.renderPage();
+        if (typeof TaskManager !== 'undefined') {
+          TaskManager.setGlobalSearch(q);
+          TaskManager.renderPage();
+        }
       } else {
         navigate('tasks');
-        TaskManager.setGlobalSearch(q);
-        TaskManager.renderPage();
+        if (typeof TaskManager !== 'undefined') {
+          TaskManager.setGlobalSearch(q);
+          TaskManager.renderPage();
+        }
       }
     }, 300));
   }
@@ -197,4 +283,10 @@ const App = (() => {
   return { init, navigate, setTheme };
 })();
 
-document.addEventListener('DOMContentLoaded', () => App.init());
+// Reliable initialization handling: execute immediately if document is already parsed,
+// otherwise bind to DOMContentLoaded.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => App.init());
+} else {
+  App.init();
+}

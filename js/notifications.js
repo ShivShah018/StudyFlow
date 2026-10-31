@@ -28,8 +28,37 @@ const Notifications = (() => {
     } catch {}
   }
 
-  function init() { if (!('Notification' in window)) return; const status = localStorage.getItem('studyflow_notif_permission'); if (status === 'denied' || status === 'granted') return; if (Notification.permission === 'default') { Notification.requestPermission().then(p => localStorage.setItem('studyflow_notif_permission', p)); } else { localStorage.setItem('studyflow_notif_permission', Notification.permission); } scheduleDailyChecks(); }
-  function send(title, body, tag) { if (!('Notification' in window) || Notification.permission !== 'granted') return; try { new Notification(title, { body, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%236366f1"/><text x="50" y="68" font-size="50" text-anchor="middle" fill="white">&#9733;</text></svg>', tag, requireInteraction: true }); playBeep(tag); } catch {} }
+  function init() {
+    try {
+      if (!('Notification' in window)) return;
+      const status = localStorage.getItem('studyflow_notif_permission');
+      if (status === 'denied' || status === 'granted') return;
+      if (Notification.permission === 'default') {
+        try {
+          const req = Notification.requestPermission(p => {
+            if (p) localStorage.setItem('studyflow_notif_permission', p);
+          });
+          if (req && typeof req.then === 'function') {
+            req.then(p => {
+              if (p) localStorage.setItem('studyflow_notif_permission', p);
+            }).catch(() => {});
+          }
+        } catch {}
+      } else {
+        localStorage.setItem('studyflow_notif_permission', Notification.permission);
+      }
+      scheduleDailyChecks();
+    } catch (e) {
+      console.warn('Notifications init notice:', e);
+    }
+  }
+  function send(title, body, tag) {
+    try {
+      if (typeof window === 'undefined' || !('Notification' in window) || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+      new Notification(title, { body, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%236366f1"/><text x="50" y="68" font-size="50" text-anchor="middle" fill="white">&#9733;</text></svg>', tag, requireInteraction: true });
+      playBeep(tag);
+    } catch {}
+  }
   function notifyPomodoroStart() { const s = getSettings(); if (s.pomodoroNotifications) { send('Pomodoro Started', 'Focus Session Started! Time to study.', 'pomodoro_start'); playBeep('pomodoro_start'); } }
   function notifyPomodoroComplete() { const s = getSettings(); if (s.pomodoroNotifications) { send('Pomodoro Complete', 'Focus Session Complete! Take a break.', 'pomodoro_complete'); playBeep('pomodoro_complete'); } Utils.showToast('Pomodoro complete! Time for a break.', 'success'); }
   function notifyPomodoroBreakOver() { const s = getSettings(); if (s.pomodoroNotifications) { send('Break Over', 'Break over! Time to focus.', 'pomodoro_break'); playBeep('pomodoro_break'); } }

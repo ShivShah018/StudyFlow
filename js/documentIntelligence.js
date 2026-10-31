@@ -325,10 +325,19 @@ const DocumentIntelligence = (() => {
 
     document.getElementById('uploadDocBtn')?.addEventListener('click', showUploadModal);
 
-    document.getElementById('docSearchBtn')?.addEventListener('click', () => {
+    const searchInput = document.getElementById('docSearchInput');
+    const performSearch = () => {
       const q = document.getElementById('docSearchInput')?.value.trim() || '';
       activeSearchQuery = q;
       render();
+    };
+
+    document.getElementById('docSearchBtn')?.addEventListener('click', performSearch);
+    searchInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        performSearch();
+      }
     });
 
     document.getElementById('clearDocSearchBtn')?.addEventListener('click', () => {
@@ -336,8 +345,10 @@ const DocumentIntelligence = (() => {
       render();
     });
 
-    container.querySelectorAll('.delete-doc-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    // Event delegation on container for document removal
+    container.addEventListener('click', (e) => {
+      const btn = e.target.closest('.delete-doc-btn');
+      if (btn) {
         e.stopPropagation();
         const id = btn.dataset.id;
         if (confirm('Delete this indexed document?')) {
@@ -345,7 +356,7 @@ const DocumentIntelligence = (() => {
           Utils.showToast('Document deleted', 'info');
           render();
         }
-      });
+      }
     });
   }
 

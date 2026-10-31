@@ -69,14 +69,28 @@ const BackupService = (() => {
               Rollback to Safety Snapshot
             </button>
           </div>
+
+          <div style="display:flex;justify-content:flex-end;padding-top:10px;">
+            <button type="button" class="btn btn-secondary" id="bkCancelBtn">Close</button>
+          </div>
         </div>
       </div>
     `;
 
     document.body.appendChild(overlay);
 
-    const close = () => overlay.remove();
+    const close = () => {
+      window.removeEventListener('keydown', handleEsc);
+      overlay.remove();
+    };
+
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') close();
+    };
+    window.addEventListener('keydown', handleEsc);
+
     document.getElementById('bkModalClose').addEventListener('click', close);
+    document.getElementById('bkCancelBtn').addEventListener('click', close);
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
 
     document.getElementById('bkExportBtn').addEventListener('click', () => {

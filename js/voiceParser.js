@@ -117,7 +117,21 @@ const VoiceParser = (() => {
       return { intent: 'COMPLETE_TASK', searchTitle: cleaned, rawText };
     }
 
-    // 7. Search Tasks by Keyword / Subject
+    // 7. Delete Task by Voice (English + Hinglish)
+    if (text.includes('delete') || text.includes('remove') || text.includes('hatao') || text.includes('mitao')) {
+      const cleaned = text
+        .replace(/delete/g, '')
+        .replace(/remove/g, '')
+        .replace(/task/g, '')
+        .replace(/assignment/g, '')
+        .replace(/hatao/g, '')
+        .replace(/mitao/g, '')
+        .replace(/karo/g, '')
+        .trim();
+      return { intent: 'DELETE_TASK', searchTitle: cleaned, rawText };
+    }
+
+    // 8. Search Tasks by Keyword / Subject
     if (text.startsWith('search') || text.startsWith('find') || text.includes('dhundo') || text.includes('dikhao')) {
       const q = text
         .replace(/^search\s*(for)?/i, '')
@@ -132,7 +146,7 @@ const VoiceParser = (() => {
       }
     }
 
-    // 8. Voice-Based Task Creation (English + Hinglish)
+    // 9. Voice-Based Task Creation (English + Hinglish)
     if (matchAny(text, ['add', 'create', 'banao', 'add karo', 'new task', 'assign'])) {
       return parseTaskCreation(text, rawText);
     }

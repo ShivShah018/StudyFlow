@@ -87,6 +87,8 @@ const Storage = (() => {
     task.completed = !task.completed;
     task.completedAt = task.completed ? new Date().toISOString() : null;
     
+    saveTasks(t);
+
     // Handle Recurring Tasks on completion
     if (task.completed && task.isRecurring && task.recurrenceInterval && task.recurrenceInterval !== 'none') {
       spawnNextRecurringTask(task);
@@ -125,7 +127,6 @@ const Storage = (() => {
       }
     }
 
-    saveTasks(t);
     return task;
   }
 

@@ -70,6 +70,8 @@ const VoiceSpeech = (() => {
         msg = 'No speech was detected. Please try speaking again.';
       } else if (err === 'network') {
         msg = 'Voice recognition requires an internet connection in Chrome/Edge.';
+      } else if (err === 'audio-capture') {
+        msg = 'No microphone was detected on this device. Please connect a microphone.';
       }
       if (callbacks.onError) callbacks.onError(err, msg);
     };
@@ -80,6 +82,7 @@ const VoiceSpeech = (() => {
     };
 
     try {
+      isListening = true;
       recognition.start();
     } catch (e) {
       isListening = false;
@@ -97,7 +100,7 @@ const VoiceSpeech = (() => {
   }
 
   function speak(text) {
-    if (!voiceResponsesEnabled || !('speechSynthesis' in window) || !text) return;
+    if (!voiceResponsesEnabled || typeof window === 'undefined' || !('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined' || !text) return;
 
     try {
       window.speechSynthesis.cancel(); // Stop any pending utterances

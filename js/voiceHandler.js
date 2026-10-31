@@ -76,7 +76,21 @@ const VoiceHandler = (() => {
 
   function triggerVoiceListening() {
     if (!VoiceSpeech.isSupported()) {
-      Utils.showToast('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.', 'error');
+      showWidget();
+      const statusEl = document.getElementById('voiceWidgetStatus');
+      const transEl = document.getElementById('voiceWidgetTranscript');
+      if (statusEl) {
+        statusEl.textContent = 'Voice API Unavailable';
+        statusEl.style.color = 'var(--danger)';
+      }
+      if (transEl) {
+        transEl.textContent = 'Web Speech API is not supported in this browser. Please use Chrome, Edge, or Safari.';
+      }
+      Utils.showToast('Speech recognition requires Chrome, Edge, or Safari.', 'error');
+      clearTimeout(activeTimeout);
+      activeTimeout = setTimeout(() => {
+        hideWidget();
+      }, 5000);
       return;
     }
 
@@ -102,25 +116,26 @@ const VoiceHandler = (() => {
         const parsed = VoiceParser.parse(finalText);
         executeParsedCommand(parsed);
 
-        // Auto-hide widget after 2.5 seconds
+        // Auto-hide widget after 3 seconds
         clearTimeout(activeTimeout);
         activeTimeout = setTimeout(() => {
           hideWidget();
-        }, 2500);
+        }, 3000);
       },
       onError: (errCode, errMsg) => {
         const statusEl = document.getElementById('voiceWidgetStatus');
         const transEl = document.getElementById('voiceWidgetTranscript');
         if (statusEl) {
-          statusEl.textContent = 'Notice';
+          statusEl.textContent = errCode === 'not-allowed' ? 'Permission Denied' : (errCode === 'no-speech' ? 'No Speech Detected' : 'Voice Notice');
           statusEl.style.color = 'var(--danger)';
         }
         if (transEl) transEl.textContent = errMsg;
+        Utils.showToast(errMsg, errCode === 'no-speech' ? 'info' : 'error');
 
         clearTimeout(activeTimeout);
         activeTimeout = setTimeout(() => {
           hideWidget();
-        }, 3000);
+        }, 4000);
       },
       onEnd: () => {
         // Recognition halted
@@ -242,6 +257,36 @@ const VoiceHandler = (() => {
         break;
       }
 
+      case 'DELETE_TASK': {
+        const query = (parsed.searchTitle || '').toLowerCase().trim();
+        const tasks = Storage.getTasks();
+        const matches = tasks.filter(t => t.title.toLowerCase().includes(query) || (t.subject && t.subject.toLowerCase().includes(query)));
+
+        if (matches.length === 1) {
+          const target = matches[0];
+          // User confirmation for destructive voice command
+          if (confirm(`Voice Assistant Action:\nAre you sure you want to delete task "${target.title}"?`)) {
+            Storage.deleteTask(target.id);
+            Utils.showToast(`Deleted task: "${target.title}"`, 'success');
+            VoiceSpeech.speak(`Deleted task ${target.title}`);
+            if (typeof TaskManager !== 'undefined') TaskManager.renderPage();
+            if (typeof Dashboard !== 'undefined') Dashboard.render();
+          } else {
+            Utils.showToast('Task deletion cancelled', 'info');
+            VoiceSpeech.speak('Task deletion cancelled');
+          }
+        } else if (matches.length > 1) {
+          if (typeof App !== 'undefined') App.navigate('tasks');
+          if (typeof TaskManager !== 'undefined') TaskManager.setGlobalSearch(query);
+          Utils.showToast(`Found ${matches.length} matching tasks. Please choose which one to delete.`, 'info');
+          VoiceSpeech.speak(`Found ${matches.length} tasks matching ${query}. Please choose which one to delete.`);
+        } else {
+          Utils.showToast(`No task found matching "${query}" to delete`, 'info');
+          VoiceSpeech.speak(`No active task found matching ${query}`);
+        }
+        break;
+      }
+
       case 'SEARCH_TASKS':
         if (typeof App !== 'undefined') App.navigate('tasks');
         if (typeof TaskManager !== 'undefined') {
@@ -342,6 +387,8 @@ const VoiceHandler = (() => {
   return {
     init,
     triggerVoiceListening,
-    hideWidget
+    showWidget,
+    hideWidget,
+    executeParsedCommand
   };
 })();

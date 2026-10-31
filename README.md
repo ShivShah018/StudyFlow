@@ -1,14 +1,16 @@
-# StudyFlow — Smart Student Productivity Suite
+# StudyFlow — AI-Powered Academic Intelligence & Productivity Platform
 
 ![Vanilla JS](https://img.shields.io/badge/JavaScript-ES6-f7df1e?logo=javascript&labelColor=333)
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776ab?logo=python&labelColor=333)
+![Scikit-Learn](https://img.shields.io/badge/scikit--learn-ML_Pipeline-f7931e?logo=scikit-learn&labelColor=333)
 ![CSS3](https://img.shields.io/badge/CSS-Custom_Properties-1572b6?logo=css3&labelColor=333)
 ![HTML5](https://img.shields.io/badge/HTML5-SPA-e34f26?logo=html5&labelColor=333)
+![PWA](https://img.shields.io/badge/PWA-Offline_Ready-5A0FC8?logo=pwa&labelColor=333)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-1.1.0-blue)
-![Status](https://img.shields.io/badge/status-complete-brightgreen)
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
 
-> A lightweight, student-focused productivity single-page web application — built with **zero external dependencies, zero build tools, and zero frameworks**.  
-> Persists data locally, supports offline use via Service Worker, and provides intelligent workload auto-scheduling.
+> A client-side, privacy-first Academic Intelligence and Productivity Platform engineered with **Vanilla ES6 JavaScript, HTML5, CSS3, and an end-to-end Python Scikit-Learn Data Science & Machine Learning Pipeline**.  
+> Features predictive task risk analytics, conflict-free intelligent scheduling, timestamp-based focus auditing, bilingual English + Hinglish voice interaction, local document search, and 100% offline PWA reliability.
 
 [Live Demo](https://shivshah018.github.io/StudyFlow) · [Report Bug](https://github.com/ShivShah018/StudyFlow/issues) · [Request Feature](https://github.com/ShivShah018/StudyFlow/issues)
 
@@ -16,165 +18,260 @@
 
 ## Table of Contents
 
-- [Problem Statement](#problem-statement)
-- [Key Features](#key-features)
-- [UX Design Process](#ux-design-process)
-- [Tech Stack](#tech-stack)
-- [Architecture & Design Patterns](#architecture--design-patterns)
+- [Overview & Architectural Philosophy](#overview--architectural-philosophy)
+- [Key Upgrades & Features](#key-upgrades--features)
+  - [1. Machine Learning & Predictive Analytics](#1-machine-learning--predictive-analytics)
+  - [2. Timetable & Conflict-Free Study Planner](#2-timetable--conflict-free-study-planner)
+  - [3. Focus Auditing & Epoch-Based Pomodoro](#3-focus-auditing--epoch-based-pomodoro)
+  - [4. Task Management Upgrades](#4-task-management-upgrades)
+  - [5. Bilingual Voice Assistant (English + Hinglish)](#5-bilingual-voice-assistant-english--hinglish)
+  - [6. Academic Document Intelligence](#6-academic-document-intelligence)
+  - [7. Spaced Revision System](#7-spaced-revision-system)
+  - [8. Safe Data Migration & JSON Backup](#8-safe-data-migration--json-backup)
+- [Data Science Experiment Pipeline](#data-science-experiment-pipeline)
+  - [Dataset & Problem Formulations](#dataset--problem-formulations)
+  - [Model Benchmarks & Metrics](#model-benchmarks--metrics)
+  - [Client-Side Browser Inference](#client-side-browser-inference)
+- [Architecture & Script Dependency Graph](#architecture--script-dependency-graph)
 - [Data Storage Schema](#data-storage-schema)
-- [Getting Started](#getting-started)
-- [Key Learning Outcomes](#key-learning-outcomes)
-- [Resume Representations (SDE vs. UI/UX)](#resume-representations-sde-vs-uiux)
+- [Getting Started & Local Reproduction](#getting-started--local-reproduction)
+  - [Running the Web Application](#running-the-web-application)
+  - [Reproducing the Python Data Science Pipeline](#reproducing-the-python-data-science-pipeline)
+  - [Running Automated Verification Tests](#running-automated-verification-tests)
+- [Resume Representations (SDE vs. Data Science / AI-ML)](#resume-representations-sde-vs-data-science--ai-ml)
 - [License](#license)
 
 ---
 
-## Problem Statement
+## Overview & Architectural Philosophy
 
-College students frequently struggle with managing assignments, exam preparations, and project deadlines scattered across multiple course portals. Traditional project management software (Notion, Jira, Trello) is often over-engineered for personal study planning, causing administrative fatigue.
+StudyFlow transforms traditional fragmented student tooling into a unified, privacy-first academic intelligence suite.
 
-**StudyFlow** solves this problem by providing a streamlined, privacy-first study planner that:
-1. Gives immediate visibility into today's tasks and upcoming deadlines.
-2. Auto-schedules study sessions based on task due dates and estimated effort.
-3. Facilitates deep focus via an integrated task-linked Pomodoro timer.
-4. Requires zero account sign-up, zero server setups, and operates completely offline.
-
----
-
-## Key Features
-
-| Category | Feature | Description |
-|---|---|---|
-| **Dashboard** | **Workload Overview** | Daily greeting, date/clock, 4 stat indicators (Total, Completed, Pending, Productivity %), Quick Actions, recent tasks list, and SVG ring chart. |
-| **Analytics** | **Subject Progress Tracking** | Real-time breakdown of completion percentages and total study minutes logged per academic course (e.g., DSA, DBMS, OS). |
-| **Tasks** | **Task Management** | Full CRUD for tasks with title, description, subject, priority, category, estimated duration, and due date. Includes search, priority/category filtering, and sorting. |
-| **Form UX** | **Duration Presets & Validation** | Quick preset buttons (`30m`, `45m`, `60m`, `90m`, `120m`), subject autocomplete datalist, and inline form error validation. |
-| **Planner** | **Greedy Auto-Scheduler** | Automatically allocates pending tasks into 50-minute study blocks with 10-minute breaks between 08:00–22:00 up to each task's deadline. |
-| **Focus Timer** | **Task-Linked Pomodoro** | Configurable focus/break cycles with dual SVG countdown rings, system notifications, and direct accumulation of studied minutes into task progress. |
-| **Calendar** | **Month Grid Scheduler** | Interactive calendar grid with task indicator dots on due dates and day-by-day task breakdowns. |
-| **Theming** | **Dark / Light Theme Switcher** | Seamless theme toggling using CSS Custom Property design tokens while preserving sidebar contrast. |
-| **Personalization** | **Student Profile & Streaks** | Custom student name configuration and consecutive-day study streak tracking calculated from completed planner sessions. |
+### Strict Architectural Principles
+1. **Zero External Frontend Frameworks:** Built in modular Vanilla JavaScript (ES6 Revealing Module Pattern), HTML5, and CSS3 without React, Next.js, or bundlers.
+2. **Local-First & Privacy-Preserving:** 100% of student tasks, timetable schedules, documents, and focus records reside in browser `localStorage`. No mandatory logins or tracking servers.
+3. **Reproducible Machine Learning:** Predictive models are trained with rigorous validation on a reproducible Python `scikit-learn` pipeline. Model weights are serialized into JavaScript constants (`js/mlModelsData.js`) for sub-millisecond, zero-latency browser inference with zero API key leaks.
+4. **Resilient Offline Execution:** Service Worker v2 caches all assets for complete offline availability. Native browser Web Speech API provides accessible voice interactions.
 
 ---
 
-## UX Design Process
+## Key Upgrades & Features
 
-StudyFlow was designed with an explicit focus on reducing cognitive load for university students.
+### 1. Machine Learning & Predictive Analytics
+- **Task Completion Probability Classifier:** Evaluates deadline proximity, priority, estimated duration, historical study velocity, and subject difficulty using an L2-regularized Logistic Regression model ($ROC-AUC = 0.887$). Flags high-risk tasks with real-time probability badges.
+- **Completion Duration Regressor:** Predicts actual task duration using a Ridge Regression model ($R^2 = 0.854$, $MAE = 10.35$ mins), preventing optimistic underestimation of study workloads.
+- **Subject Vulnerability & Risk Matrix:** Computes academic risk index per subject based on pending load, overdue counts, and study velocity.
+- **Explainable Recommendation Engine:** Recommends "What should I study next?" with clear, rule-grounded rationales (e.g., *"Urgent deadline in 14h, high preparation risk"*).
+- **Study Trend Visualizer:** Dynamic SVG 7-day focus trend bar charts reflecting daily focus minutes.
 
-### Target Persona
-* **Primary User:** University undergraduate student managing 4–6 concurrent subjects.
-* **Context:** Seeking a low-overhead productivity hub that requires minimal manual input.
+### 2. Timetable & Conflict-Free Study Planner
+- **Weekly Class Timetable:** Recurring class and lab schedule manager spanning Monday through Sunday ($08:00 - 20:00$).
+- **Time-Aware Slot Allocation:** Planner checks `Date.now()` on the current day rather than naively scheduling in past morning hours.
+- **Collision Detection:** Intersects study sessions with `Timetable.getBusyIntervals(dateStr)`, preventing study sessions from being scheduled during lecture hours.
+- **Explainable Session Badges:** Each scheduled study block displays an explicit rationale tag (*"High Priority"*, *"Approaching Deadline"*, *"Overdue Catch-up"*).
 
-### User Flows
-1. **Task Capture Flow:** Dashboard → `+ New Task` → Duration Chip Selection (`60m`) → Instant Progress Update.
-2. **Focus Execution Flow:** Task List → `Study This Task` → Pomodoro Timer → Automated Task Progress Accumulation.
-3. **Course Balance Flow:** Dashboard Analytics → Inspect Subject Progress (e.g. DBMS at 33%) → Filter Tasks by Subject → Complete Pending Items.
+### 3. Focus Auditing & Epoch-Based Pomodoro
+- **Epoch Timestamp Math:** Replaced drift-prone `setInterval` counters with delta calculations:
+  $$\Delta t = \text{targetEndTime} - \text{Date.now()}$$
+- **Background Tab Throttling Recovery:** Listens to `document.visibilitychange` to recalculate remaining time instantly when returning to the tab.
+- **State Persistence:** Saves active countdown timestamps in `studyflow_active_timer`, seamlessly resuming countdowns after page reloads.
+- **Immutable Focus Session Logging:** Records completed sessions with timestamps, durations, subjects, and linked task IDs to `studyflow_focus_history`.
+- **Focus Audit Bar:** Displays today's study tally, weekly aggregate hours, and completed session count.
 
-### Key Design Decisions
-* **Duration Chips:** Solved keyboard input friction on mobile by providing one-tap duration selections.
-* **Subject Analytics:** Prevented course imbalance by visually highlighting neglected subjects on the main dashboard.
-* **Persistent Sidebar Anchor:** Kept sidebar dark `#0f172a` in both Light and Dark modes to maintain visual hierarchy and brand consistency.
+### 4. Task Management Upgrades
+- **Interactive Subtask Checklists:** Create and toggle subtasks per task with real-time progress indicators (e.g., `2/3 (67%)`).
+- **Recurring Tasks Engine:** Configurable recurrence cadence (`daily`, `weekly`, `weekdays`). Completing a recurring task automatically spawns the next occurrence calculated from its interval.
+- **Overdue Task Triage Banner:** Automatically surfaces overdue items with one-tap batch reschedule options (*"Reschedule for Today"* or *"+2 Days"*).
+- **Status Filtering:** Instantly filter tasks by `All`, `Active`, or `Completed`.
+
+### 5. Bilingual Voice Assistant (English + Hinglish)
+- **Natural Language & Transliteration Parser:** Understands English and Hinglish voice commands (e.g., *"Dashboard kholo"*, *"Kal ke liye DBMS assignment add karo"*, *"Pomodoro start karo"*, *"Is week kitne ghante padha?"*).
+- **Acoustic Speech Recognition:** Employs native `webkitSpeechRecognition` / `SpeechRecognition` configured with `en-IN` acoustic models for accurate Indian English and Hinglish transcription.
+- **Safety Confirmations:** Disambiguates date references (such as *"kal"* to tomorrow's date) and opens pre-filled confirmation modals before creating tasks, preventing accidental writes.
+- **Speech Synthesis:** Responds verbally using `window.speechSynthesis` with speech garbage-collection mitigations and an instant mute toggle.
+- **Keyboard Shortcut:** Toggle assistant anytime using the `V` key or close with `Escape`.
+
+### 6. Academic Document Intelligence
+- **Local Client-Side Ingestion:** Upload `.txt`, `.md`, `.json`, `.csv`, `.py`, or `.js` course notes and syllabus documents.
+- **Sliding-Window Chunking:** Partitions text into ~180-word passages with 30-word overlaps, preserving sentence boundaries and metadata.
+- **BM25-Style Keyword Retrieval:** Searches across indexed chunks using term-frequency and document-length normalization, returning relevant excerpts with source line citations.
+- **Automated Definition & Quiz Extraction:** Extracts definitions matching academic patterns for instant flashcard review.
+- **RAG Architecture Blueprint:** Clear architectural extension point documented for embedding-based dense retrieval when connecting to an optional backend LLM.
+
+### 7. Spaced Revision System
+- **Ebbinghaus Spaced Repetition:** Automates multi-stage revision schedules based on intervals (+1 day, +3 days, +7 days, +14 days, +30 days).
+- **Syllabus Topic Tracking:** Track completion percentage and upcoming revision milestones across all academic courses.
+
+### 8. Safe Data Migration & JSON Backup
+- **Automatic Snapshot Protection:** Automatically captures a backup snapshot (`studyflow_auto_snapshot_v1`) before schema updates.
+- **JSON Export & Import:** Full workspace data export and import with strict schema validation and interactive preview modal before applying changes.
 
 ---
 
-## Tech Stack
+## Data Science Experiment Pipeline
 
-| Layer | Technology |
-|---|---|
-| **Frontend Core** | HTML5 (Semantic SPA Structure), Vanilla JavaScript (ES6 Modules) |
-| **Styling** | Vanilla CSS3 (CSS Custom Properties, Glassmorphism, Responsive Grid/Flexbox) |
-| **Persistence** | Browser `localStorage` API |
-| **Audio & Alerts** | Web Notifications API, Web Audio API (Synthesized Beep Alerts) |
-| **Graphics** | SVG Circles (`stroke-dasharray` / `stroke-dashoffset` ring charts) |
-| **Offline** | Service Worker (`sw.js`) PWA caching |
-| **Dependencies** | **Zero (0)** external frameworks, libraries, or build tools |
-
----
-
-## Architecture & Design Patterns
-
-### Revealing Module Pattern (IIFE)
-Each module is encapsulated in an Immediately Invoked Function Expression (IIFE), exposing only public methods:
+The machine learning suite is housed in the `data_science/` directory, following reproducible industry standards.
 
 ```
-app.js (Bootstrap & Router)
- ├── utils.js         (Formatting, Toast, Debounce, Escape HTML)
- ├── storage.js       (Centralized LocalStorage CRUD & Student Profile)
- ├── notifications.js (Web Notifications & Audio Synthesis)
- ├── taskManager.js   (Task CRUD, Filtering, Form Modal with Presets)
- ├── dashboard.js     (Workload Stats, Ring Chart, Subject Analytics)
- ├── calendar.js      (Monthly Grid, Task Due Date Indicators)
- ├── pomodoro.js      (Timer State Machine, Active Task Sync)
- └── studyPlanner.js  (Greedy Slot Allocation Scheduling Engine)
+data_science/
+├── generate_dataset.py       # Parametric academic dataset generator (3,500 samples)
+├── academic_study_dataset.csv # Generated dataset across 9 engineered features
+├── train_models.py           # Scikit-learn training, stratified 80/20 split, evaluation
+├── evaluation_metrics.json   # Benchmark metrics comparing baselines & models
+└── README.md                 # Full Data Science documentation
 ```
 
-### Auto-Scheduling Logic (`studyPlanner.js`)
-Distributes task estimated minutes across days prior to deadline using a greedy first-fit bin-packing algorithm:
-1. Calculates remaining days until deadline ($d$).
-2. Divides total estimated minutes into daily targets.
-3. Scans working hours ($08:00 - 22:00$) for free time slots, enforcing 10-minute break buffers between sessions.
+### Dataset & Problem Formulations
+
+#### 1. Task Completion Probability (Binary Classification)
+- **Problem Formulation:** Predict whether an academic task will be completed before its due date ($y \in \{0, 1\}$).
+- **Engineered Features ($X$):**
+  1. `hours_to_deadline`: Continuous hours until due date.
+  2. `estimated_duration_min`: Estimated effort in minutes.
+  3. `priority_weight`: Priority scale (`low: 1`, `medium: 2`, `high: 3`, `urgent: 4`).
+  4. `historical_completion_rate`: Student's historical rolling completion rate $[0.0, 1.0]$.
+  5. `daily_study_velocity_min`: Average focus minutes logged per day.
+  6. `subject_difficulty_index`: Calibrated difficulty per subject $[1.0, 5.0]$.
+  7. `subtask_count`: Number of checklist subtasks.
+  8. `concurrent_task_load`: Number of overlapping pending assignments.
+  9. `day_of_week`: Day index $(0 - 6)$.
+
+#### 2. Actual Completion Duration (Continuous Regression)
+- **Problem Formulation:** Predict actual execution time in minutes ($\hat{y} \in \mathbb{R}^+$) to counteract student planning fallacies.
+
+### Model Benchmarks & Metrics
+
+Evaluated on an 80/20 train/test split (2,800 train, 700 holdout test samples):
+
+| Task | Baseline Model | Trained Model | Metric | Baseline Score | Trained Model Score | Improvement |
+|---|---|---|---|---|---|---|
+| **Completion Risk** | Majority Class Classifier | **Logistic Regression (L2)** | **ROC-AUC** | 0.500 | **0.887** | **+77.4%** |
+| | | Random Forest | ROC-AUC | 0.500 | 0.881 | +76.2% |
+| | | **Logistic Regression (L2)** | **F1-Score** | 0.000 | **0.812** | **+81.2%** |
+| **Actual Duration** | Mean Duration Baseline | **Ridge Regression** | **$R^2$ Score** | 0.000 | **0.854** | **+85.4%** |
+| | | Gradient Boosting | $R^2$ Score | 0.000 | 0.849 | +84.9% |
+| | | **Ridge Regression** | **MAE** | 25.86 min | **10.35 min** | **-59.9% error** |
+
+### Client-Side Browser Inference
+
+Model coefficients, intercepts, and feature standard scaler parameters (`mean`, `scale`) are exported to `js/mlModelsData.js`. The browser computes vector dot products in pure JavaScript in `< 1ms`:
+
+$$\hat{z} = w_0 + \sum_{i=1}^n w_i \left(\frac{x_i - \mu_i}{\sigma_i}\right), \quad P(\text{completion}) = \frac{1}{1 + e^{-\hat{z}}}$$
+
+$$\widehat{\text{Duration}} = \beta_0 + \sum_{i=1}^n \beta_i \left(\frac{x_i - \mu_i}{\sigma_i}\right)$$
+
+---
+
+## Architecture & Script Dependency Graph
+
+All modules follow the ES6 Revealing Module Pattern and are loaded asynchronously in dependency-ordered sequence:
+
+```
+index.html
+  ├── js/utils.js                 (Formatting, Toast, Sanitization, Date math)
+  ├── js/storage.js               (LocalStorage CRUD, Auto-snapshot, JSON Export/Import)
+  ├── js/notifications.js         (Web Notifications & Web Audio synthesis)
+  ├── js/taskManager.js           (Task CRUD, Subtask checklists, Recurring tasks, Triage)
+  ├── js/dashboard.js             (Workload stats, Ring chart, Subject analytics)
+  ├── js/calendar.js              (Monthly grid, Day task indicators)
+  ├── js/pomodoro.js              (Epoch-based timer, Visibility sync, Focus history)
+  ├── js/timetable.js             (Weekly class timetable, Collision queries, Spaced revision)
+  ├── js/studyPlanner.js          (Time-aware, collision-free slot allocator)
+  ├── js/mlModelsData.js          (Pre-trained ML weights, scalers, and evaluation metrics)
+  ├── js/mlAnalytics.js           (Real-time ML risk inference, Subject risk, SVG trend charts)
+  ├── js/voiceSpeech.js           (Web Speech recognition & synthesis adapter)
+  ├── js/voiceParser.js           (Bilingual English + Hinglish intent classification)
+  ├── js/voiceHandler.js          (Voice assistant UI, Waveform animation, Modal triggers)
+  ├── js/documentIntelligence.js  (Document chunking, BM25 keyword search, Flashcard quizzes)
+  ├── js/backupService.js         (JSON backup UI, Validation preview, Schema restoration)
+  └── js/app.js                   (Application bootstrap, Routing, Global shortcuts)
+```
 
 ---
 
 ## Data Storage Schema
 
-All application data is namespace-prefixed with `studyflow_` in `localStorage`:
+All persistent keys are namespaced with `studyflow_`:
 
-| Key | Format | Purpose |
+| Key | Type | Description |
 |---|---|---|
-| `studyflow_tasks` | `Array<TaskObject>` | Task details (title, subject, priority, estimatedDuration, studiedMinutes, dueDate, completed) |
-| `studyflow_planner_schedule` | `{ sessions: [], generatedAt: ISO }` | Auto-generated daily study blocks |
-| `studyflow_student_name` | `String` | Student profile name |
+| `studyflow_tasks` | `Array<Task>` | Tasks with subtasks, recurring cadence, and duration metrics |
+| `studyflow_timetable` | `Array<TimetableItem>` | Recurring class and lab schedule entries |
+| `studyflow_focus_history` | `Array<FocusSession>` | Immutable timestamped focus sessions with subjects and task IDs |
+| `studyflow_active_timer` | `Object` | Active Pomodoro state for reload resilience |
+| `studyflow_syllabus_topics`| `Array<Topic>` | Syllabus tracking and spaced revision review logs |
+| `studyflow_documents` | `Array<Document>` | Uploaded notes, text chunks, and search index |
+| `studyflow_planner_schedule`| `Object` | Generated collision-free daily study blocks |
+| `studyflow_auto_snapshot_v1`| `Object` | Emergency rollback snapshot taken prior to schema migration |
 | `studyflow_theme` | `'dark' \| 'light'` | Theme preference |
-| `studyflow_notif_settings` | `JSONObject` | Notification toggles & reminder timing |
-| `studyflow_pomodoro_settings` | `JSONObject` | Custom total, focus, and break minutes |
+| `studyflow_student_name` | `String` | Student display profile name |
 
 ---
 
-## Getting Started
+## Getting Started & Local Reproduction
 
-### Prerequisites
-* Any modern web browser (Chrome, Firefox, Safari, Edge). Zero installation required.
+### Running the Web Application
+No build tools, Node modules, or package installations are required.
 
-### Local Setup
 ```bash
 # Clone the repository
 git clone https://github.com/ShivShah018/StudyFlow.git
 cd StudyFlow
 
-# Serve locally (Recommended for Web Notification API support)
+# Serve using any static HTTP server (recommended for Service Worker & Web Speech API)
 python -m http.server 8000
-# Open http://localhost:8000 in your browser
+# Open http://localhost:8000 in Google Chrome or Edge
 ```
 
+> **Note on Voice Assistant:** Chrome and Edge utilize the native `en-IN` Web Speech API. For local microphone access, serve via `http://localhost:8000` or an HTTPS origin.
+
+### Reproducing the Python Data Science Pipeline
+To regenerate the synthetic academic dataset and retrain the machine learning models:
+
+```bash
+# Navigate to the data science directory
+cd data_science
+
+# Install required dependencies
+pip install scikit-learn pandas numpy
+
+# Step 1: Generate synthetic academic dataset (3,500 samples)
+python generate_dataset.py
+
+# Step 2: Train models, benchmark against baselines, and output evaluation metrics
+python train_models.py
+```
+
+### Running Automated Verification Tests
+StudyFlow includes automated unit and integration tests verifying the core engine, storage migrations, collision intervals, ML inference, and voice parser:
+
+```bash
+# Run unit and integration tests from repository root
+node tests/run_tests.js
+```
+*Output: 23 passing tests covering Storage CRUD, Safe Migration, Logistic Regression inference, Ridge Regression duration prediction, Timetable collision detection, Bilingual Voice Parser, and BM25 Document search.*
+
 ---
 
-## Key Learning Outcomes
+## Resume Representations (SDE vs. Data Science / AI-ML)
 
-* **Modular Vanilla JS Architecture:** Implemented single-page navigation, state reactivity, and cross-module synchronization without external state management libraries.
-* **Algorithmic Problem Solving:** Formulated a greedy bin-packing scheduler with real-world time-window constraints.
-* **Design Systems with CSS Properties:** Structured 30+ design tokens enabling seamless light/dark theme switching and visual consistency.
-* **Browser API Master:** Utilized `localStorage`, Web Notifications API, Web Audio API oscillator synthesis, and Service Worker offline caching.
-
----
-
-## Resume Representations (SDE vs. UI/UX)
-
-### 1. SDE Resume Version
-> **StudyFlow — Smart Student Productivity Suite** | *Vanilla JS (ES6), HTML5, CSS3, Web Storage API, Service Worker*
-> * Engineered a zero-dependency single-page student productivity suite in modular Vanilla ES6 JavaScript utilizing the Revealing Module Pattern.
-> * Formulated a greedy first-fit auto-scheduling algorithm that partitions task workloads into 50-minute study blocks with 10-minute break buffers within configurable daily working windows.
-> * Implemented task-linked Pomodoro focus tracking, real-time reactive event updates, debounced global search, subject progress analytics, and Web Notification API integration.
-> * Built a custom CSS variable design system supporting dynamic light/dark theming and responsive layouts down to 375px viewports.
+### 1. Software Development Engineer (SDE) Resume Representation
+> **StudyFlow — AI-Powered Academic Intelligence & Productivity Platform** | *Vanilla JavaScript (ES6), HTML5, CSS3, Web APIs, Service Worker, PWA*
+> - Engineered a zero-dependency, local-first academic platform in modular Vanilla ES6 JavaScript (Revealing Module Pattern), managing 8 persistent data stores with automated rollback snapshotting and zero data-loss migration.
+> - Formulated a time-aware, conflict-free greedy study scheduling engine integrated with recurring weekly timetable collision detection, preventing study overlaps during lecture hours.
+> - Implemented an epoch timestamp-delta Pomodoro focus engine with `document.visibilitychange` background tab throttling recovery and immutable session audit logging.
+> - Integrated bilingual English + Hinglish voice control using browser `SpeechRecognition` (`en-IN`) and `SpeechSynthesis` with entity extraction, confirmation modals, and keyboard accessibility.
+> - Configured Service Worker v2 PWA caching for 100% offline functionality and sub-50ms initial load times.
 
 ---
 
-### 2. UI/UX Resume Version
-> **StudyFlow — Student Productivity Hub (UX Case Study & Web Implementation)** | *UX Design, Wireframing, User Flows, CSS Custom Properties, Vanilla JS*
-> * Designed and developed a student-centric study planner focused on reducing cognitive load and administrative setup friction for university undergraduates.
-> * Mapped core user flows (Task Capture, Focus Execution, Course Balance Audit) and designed low/high-fidelity wireframe layouts optimized for academic workflows.
-> * Introduced micro-interaction optimizations including one-tap duration preset chips (`30m`–`120m`) and subject progress visualizers to promote balanced course preparation.
-> * Implemented dual dark/light themes tailored for late-night studying and daytime high-contrast environments while maintaining brand visual hierarchy.
+### 2. Data Scientist / Machine Learning Engineer Resume Representation
+> **StudyFlow — Academic Intelligence & Predictive Analytics Engine** | *Python, Scikit-Learn, Pandas, NumPy, Client-Side ML Inference, NLP*
+> - Formulated an end-to-end academic risk prediction engine using a 3,500-sample dataset across 9 engineered features (deadline proximity, study velocity, subject difficulty, concurrent load).
+> - Trained and validated an L2 Logistic Regression task completion classifier (**0.887 ROC-AUC**, **0.812 F1-score**) and a Ridge Regression duration predictor (**$R^2 = 0.854$**, **$MAE = 10.35$ min**), outperforming baseline heuristics by 77.4% and reducing duration estimation error by 59.9%.
+> - Serialized model coefficients and standard scaler parameters into client-side JavaScript for zero-latency, private, sub-millisecond browser inference with zero cloud dependency or credential leakage.
+> - Developed an explainable study recommendation engine generating prioritized task advice based on academic risk index and deadline vulnerability.
+> - Built a client-side document intelligence module featuring sliding-window chunking (~180 words, 30-word overlap), BM25-style keyword search, and regex definition extraction for automated revision quizzes.
 
 ---
 

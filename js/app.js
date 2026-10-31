@@ -1,5 +1,5 @@
 const App = (() => {
-  const PAGES = ['dashboard', 'tasks', 'calendar', 'pomodoro', 'planner'];
+  const PAGES = ['dashboard', 'tasks', 'calendar', 'pomodoro', 'planner', 'analytics', 'timetable', 'documents'];
 
   function init() {
     initTheme();
@@ -91,18 +91,32 @@ const App = (() => {
     Calendar.init();
     Pomodoro.init();
     StudyPlanner.init();
+    if (typeof Timetable !== 'undefined') Timetable.init();
+    if (typeof MLAnalytics !== 'undefined') MLAnalytics.init();
+    if (typeof DocumentIntelligence !== 'undefined') DocumentIntelligence.init();
+    if (typeof VoiceHandler !== 'undefined') VoiceHandler.init();
     if (typeof Notifications !== 'undefined') Notifications.init();
   }
 
   function navigate(page) {
     if (!PAGES.includes(page)) return;
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(`page-${page}`).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.page === page));
+    const targetPage = document.getElementById(`page-${page}`);
+    if (targetPage) targetPage.classList.add('active');
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.page === page);
+    });
+
     if (page === 'dashboard') Dashboard.render();
     if (page === 'tasks') TaskManager.renderPage();
     if (page === 'calendar') Calendar.render();
+    if (page === 'pomodoro' && typeof Pomodoro !== 'undefined') Pomodoro.renderFocusStats();
     if (page === 'planner') StudyPlanner.render();
+    if (page === 'analytics' && typeof MLAnalytics !== 'undefined') MLAnalytics.render();
+    if (page === 'timetable' && typeof Timetable !== 'undefined') Timetable.render();
+    if (page === 'documents' && typeof DocumentIntelligence !== 'undefined') DocumentIntelligence.render();
+
     closeMobileSidebar();
   }
 
@@ -136,23 +150,51 @@ const App = (() => {
       const sidebar = document.getElementById('sidebar');
       sidebar.classList.toggle('mobile-open');
       let overlay = document.querySelector('.sidebar-overlay');
-      if (!overlay) { overlay = document.createElement('div'); overlay.className = 'sidebar-overlay'; overlay.addEventListener('click', closeMobileSidebar); document.body.appendChild(overlay); }
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        overlay.addEventListener('click', closeMobileSidebar);
+        document.body.appendChild(overlay);
+      }
       overlay.classList.toggle('active');
     });
+
     document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
     document.getElementById('profileEditBtn')?.addEventListener('click', showProfileModal);
-    document.getElementById('notifSettingsBtn')?.addEventListener('click', () => { if (typeof Notifications !== 'undefined') Notifications.renderSettingsModal(); });
+    document.getElementById('notifSettingsBtn')?.addEventListener('click', () => {
+      if (typeof Notifications !== 'undefined') Notifications.renderSettingsModal();
+    });
+
+    // Voice Assistant trigger button in top bar
+    document.getElementById('voiceAssistantBtn')?.addEventListener('click', () => {
+      if (typeof VoiceHandler !== 'undefined') {
+        VoiceHandler.triggerVoiceListening();
+      }
+    });
+
+    // Backup & Restore button in sidebar footer
+    document.getElementById('backupRestoreBtn')?.addEventListener('click', () => {
+      if (typeof BackupService !== 'undefined') {
+        BackupService.showBackupModal();
+      }
+    });
+
     document.getElementById('globalSearch')?.addEventListener('input', Utils.debounce(e => {
       const q = e.target.value.trim();
       const activePage = document.querySelector('.page.active');
       const pageId = activePage?.id.replace('page-', '');
-      if (pageId === 'tasks') { TaskManager.setGlobalSearch(q); TaskManager.renderPage(); }
-      else { navigate('tasks'); TaskManager.setGlobalSearch(q); TaskManager.renderPage(); }
+      if (pageId === 'tasks') {
+        TaskManager.setGlobalSearch(q);
+        TaskManager.renderPage();
+      } else {
+        navigate('tasks');
+        TaskManager.setGlobalSearch(q);
+        TaskManager.renderPage();
+      }
     }, 300));
   }
 
-  return { init, navigate };
+  return { init, navigate, setTheme };
 })();
 
 document.addEventListener('DOMContentLoaded', () => App.init());
-

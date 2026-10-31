@@ -1,9 +1,10 @@
 const Pomodoro = (() => {
-  let totalMinutes = 60, focusMinutes = 20, breakMinutes = 5;
-  let focusSeconds = 1200, breakSeconds = 300;
-  let timeLeft = 1200, elapsedSeconds = 0;
+  let totalMinutes = 60, focusMinutes = 25, breakMinutes = 5;
+  let focusSeconds = 1500, breakSeconds = 300;
+  let timeLeft = 1500, elapsedSeconds = 0;
   let isFocus = true, cycleCount = 0;
   let timerId = null, isRunning = false, isPaused = false;
+  let targetEndTime = null;
   let activeTaskId = null, taskFocusSeconds = 0;
 
   function init() {
@@ -11,8 +12,11 @@ const Pomodoro = (() => {
       loadSettings();
       syncInputsToDOM();
 
-      document.getElementById('pomodoroStartBtn').onclick = function () {
-        if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+      // Bind button controls
+      document.getElementById('pomodoroStartBtn').onclick = () => {
+        if ('Notification' in window && Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
         startTimer();
       };
       document.getElementById('pomodoroPauseBtn').onclick = pauseTimer;
@@ -25,17 +29,87 @@ const Pomodoro = (() => {
         document.getElementById(`p${name}Inc`).onclick = () => adjustValue(field, 1);
       });
 
+      // Handle visibility changes for background-tab drift protection
+      document.addEventListener('visibilitychange', () => {
+        if (isRunning && !isPaused && targetEndTime) {
+          syncTimestampDelta();
+          updateDisplay();
+        }
+      });
+
+      // Recover persisted timer state if user refreshed or navigated back
+      recoverPersistedState();
+      renderFocusStats();
       updateDisplay();
     } catch (e) {
+      console.error('Pomodoro init error:', e);
       document.getElementById('pomodoroDisplay').textContent = 'ERR';
-      document.getElementById('pomodoroPhase').textContent = 'Init failed, check console';
     }
+  }
+
+  function recoverPersistedState() {
+    const saved = Storage.getActiveTimerState ? Storage.getActiveTimerState() : null;
+    if (!saved || !saved.isRunning) return;
+
+    if (saved.isPaused) {
+      isRunning = true;
+      isPaused = true;
+      timeLeft = saved.timeLeft;
+      elapsedSeconds = saved.elapsedSeconds;
+      isFocus = saved.isFocus;
+      cycleCount = saved.cycleCount;
+      activeTaskId = saved.activeTaskId;
+    } else if (saved.targetEndTime) {
+      const now = Date.now();
+      const remainingMs = saved.targetEndTime - now;
+      if (remainingMs > 0) {
+        isRunning = true;
+        isPaused = false;
+        targetEndTime = saved.targetEndTime;
+        timeLeft = Math.round(remainingMs / 1000);
+        elapsedSeconds = saved.elapsedSeconds + Math.round((now - (saved.lastTick || now)) / 1000);
+        isFocus = saved.isFocus;
+        cycleCount = saved.cycleCount;
+        activeTaskId = saved.activeTaskId;
+        timerId = setInterval(tick, 1000);
+      } else {
+        // Timer completed while away
+        Storage.saveActiveTimerState(null);
+      }
+    }
+  }
+
+  function persistCurrentState() {
+    if (!Storage.saveActiveTimerState) return;
+    if (!isRunning) {
+      Storage.saveActiveTimerState(null);
+      return;
+    }
+    Storage.saveActiveTimerState({
+      isRunning,
+      isPaused,
+      timeLeft,
+      elapsedSeconds,
+      isFocus,
+      cycleCount,
+      targetEndTime,
+      activeTaskId,
+      lastTick: Date.now()
+    });
+  }
+
+  function syncTimestampDelta() {
+    if (!targetEndTime) return;
+    const now = Date.now();
+    const remainingMs = targetEndTime - now;
+    timeLeft = Math.max(0, Math.round(remainingMs / 1000));
   }
 
   function setActiveTask(taskId) {
     activeTaskId = taskId;
     taskFocusSeconds = 0;
     renderTaskInfo();
+    persistCurrentState();
   }
 
   function clearActiveTask() {
@@ -43,6 +117,7 @@ const Pomodoro = (() => {
     taskFocusSeconds = 0;
     const info = document.getElementById('pomodoroTaskInfo');
     if (info) info.style.display = 'none';
+    persistCurrentState();
   }
 
   function getActiveTask() {
@@ -58,7 +133,8 @@ const Pomodoro = (() => {
     if (additional === 0) return;
     const studied = (task.studiedMinutes || 0) + additional;
     taskFocusSeconds = taskFocusSeconds % 60;
-    Storage.updateTask(task.id, { studiedMinutes: studied });
+    Storage.updateTask(task.id, { studiedMinutes: studied, actualDuration: studied });
+    
     if (task.estimatedDuration && studied >= task.estimatedDuration) {
       Storage.updateTask(task.id, { completed: true, completedAt: new Date().toISOString() });
       Utils.showToast('Task completed! Great work!', 'success');
@@ -92,14 +168,22 @@ const Pomodoro = (() => {
   function loadSettings() {
     try {
       const s = JSON.parse(localStorage.getItem('studyflow_pomodoro_settings') || '{}');
-      totalMinutes = s.totalMinutes || 60; focusMinutes = s.focusMinutes || 20; breakMinutes = s.breakMinutes || 5;
+      totalMinutes = s.totalMinutes || 60;
+      focusMinutes = s.focusMinutes || 25;
+      breakMinutes = s.breakMinutes || 5;
     } catch {}
-    focusSeconds = focusMinutes * 60; breakSeconds = breakMinutes * 60;
-    timeLeft = focusSeconds; elapsedSeconds = 0; isFocus = true; cycleCount = 0;
+    focusSeconds = focusMinutes * 60;
+    breakSeconds = breakMinutes * 60;
+    timeLeft = focusSeconds;
+    elapsedSeconds = 0;
+    isFocus = true;
+    cycleCount = 0;
   }
 
   function saveSettings() {
-    try { localStorage.setItem('studyflow_pomodoro_settings', JSON.stringify({ totalMinutes, focusMinutes, breakMinutes })); } catch {}
+    try {
+      localStorage.setItem('studyflow_pomodoro_settings', JSON.stringify({ totalMinutes, focusMinutes, breakMinutes }));
+    } catch {}
   }
 
   function syncInputsToDOM() {
@@ -148,8 +232,15 @@ const Pomodoro = (() => {
     if (s) s.textContent = `Cycle ${cycleCount} · ${remainingTotal} min left`;
     if (bar) bar.style.width = `${totalPct}%`;
     if (pctLabel) pctLabel.textContent = `${Math.round(totalPct)}% of total study time completed`;
-    if (r) { r.setAttribute('stroke-dasharray', rc.toString()); r.setAttribute('stroke-dashoffset', (rc - (phasePct/100)*rc).toString()); r.setAttribute('stroke', isFocus ? 'var(--accent)' : 'var(--success)'); }
-    if (tr) { tr.setAttribute('stroke-dasharray', tc.toString()); tr.setAttribute('stroke-dashoffset', (tc - (totalPct/100)*tc).toString()); }
+    if (r) {
+      r.setAttribute('stroke-dasharray', rc.toString());
+      r.setAttribute('stroke-dashoffset', (rc - (phasePct / 100) * rc).toString());
+      r.setAttribute('stroke', isFocus ? 'var(--accent)' : 'var(--success)');
+    }
+    if (tr) {
+      tr.setAttribute('stroke-dasharray', tc.toString());
+      tr.setAttribute('stroke-dashoffset', (tc - (totalPct / 100) * tc).toString());
+    }
 
     const startBtn = document.getElementById('pomodoroStartBtn');
     const pauseBtn = document.getElementById('pomodoroPauseBtn');
@@ -162,68 +253,112 @@ const Pomodoro = (() => {
     document.querySelectorAll('#page-pomodoro .pomodoro-duration-row input').forEach(el => el.disabled = isRunning);
   }
 
-  function formatTime(s) { return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+  function formatTime(s) {
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  }
 
   function startTimer() {
     if (isRunning) return;
     readInputs();
     if (timeLeft <= 0) { timeLeft = focusSeconds; isFocus = true; elapsedSeconds = 0; cycleCount = 0; }
-    isRunning = true; isPaused = false; cycleCount++;
+    isRunning = true;
+    isPaused = false;
+    cycleCount++;
+    targetEndTime = Date.now() + (timeLeft * 1000);
     updateDisplay();
+    persistCurrentState();
+
     if (timerId) clearInterval(timerId);
     timerId = setInterval(tick, 1000);
     if (typeof Notifications !== 'undefined') Notifications.notifyPomodoroStart();
   }
 
   function tick() {
-    timeLeft--; elapsedSeconds++;
+    syncTimestampDelta();
+    elapsedSeconds++;
+
     if (isFocus && activeTaskId) {
       taskFocusSeconds++;
       if (taskFocusSeconds % 60 === 0) saveTaskProgress();
     }
+
+    persistCurrentState();
     updateDisplay();
+
     if (timeLeft > 0) return;
+
+    // Time cycle completed
     const total = totalMinutes * 60;
+    if (isFocus) {
+      // Record immutable focus session log
+      const activeTask = getActiveTask();
+      Storage.addFocusSession({
+        id: 'foc_' + Date.now().toString(36),
+        taskId: activeTask ? activeTask.id : null,
+        taskTitle: activeTask ? activeTask.title : 'General Study',
+        subject: activeTask ? (activeTask.subject || activeTask.category || 'General') : 'General',
+        durationMinutes: focusMinutes,
+        timestamp: new Date().toISOString()
+      });
+      renderFocusStats();
+    }
+
     if (elapsedSeconds >= total) {
       clearInterval(timerId); timerId = null;
-      isRunning = false; isPaused = false;
+      isRunning = false; isPaused = false; targetEndTime = null;
+      persistCurrentState();
       updateDisplay();
       if (typeof Notifications !== 'undefined') Notifications.notifyPomodoroComplete();
-      Utils.showToast('All study sessions complete! Great work!', 'success');
+      Utils.showToast('All planned study cycles completed! Excellent work!', 'success');
       return;
     }
+
     if (isFocus) {
-      isFocus = false; timeLeft = breakSeconds;
+      isFocus = false;
+      timeLeft = breakSeconds;
+      targetEndTime = Date.now() + (timeLeft * 1000);
       if (typeof Notifications !== 'undefined') Notifications.notifyPomodoroComplete();
     } else {
-      isFocus = true; timeLeft = focusSeconds; cycleCount++;
+      isFocus = true;
+      timeLeft = focusSeconds;
+      cycleCount++;
+      targetEndTime = Date.now() + (timeLeft * 1000);
       if (typeof Notifications !== 'undefined') Notifications.notifyPomodoroBreakOver();
       Utils.showToast('Break over! Time to focus.', 'info');
     }
+    persistCurrentState();
     updateDisplay();
   }
 
   function pauseTimer() {
     if (!isRunning || isPaused) return;
+    syncTimestampDelta();
     isPaused = true;
+    targetEndTime = null;
     if (timerId) { clearInterval(timerId); timerId = null; }
     if (activeTaskId && taskFocusSeconds > 0) saveTaskProgress();
+    persistCurrentState();
     updateDisplay();
   }
 
   function resumeTimer() {
     if (!isPaused) return;
     isPaused = false;
+    targetEndTime = Date.now() + (timeLeft * 1000);
     timerId = setInterval(tick, 1000);
+    persistCurrentState();
     updateDisplay();
   }
 
   function resetTimer() {
     if (timerId) { clearInterval(timerId); timerId = null; }
-    isRunning = false; isPaused = false;
+    isRunning = false;
+    isPaused = false;
+    targetEndTime = null;
     if (activeTaskId && taskFocusSeconds > 0) saveTaskProgress();
     loadSettings();
     syncInputsToDOM();
+    persistCurrentState();
     updateDisplay();
   }
 
@@ -243,7 +378,74 @@ const Pomodoro = (() => {
     updateDisplay();
   }
 
-  function getActiveTaskId() { return activeTaskId; }
+  function renderFocusStats() {
+    let statsCard = document.getElementById('pomodoroFocusHistoryCard');
+    if (!statsCard) {
+      const root = document.getElementById('pomodoroRoot');
+      if (!root) return;
+      statsCard = document.createElement('div');
+      statsCard.id = 'pomodoroFocusHistoryCard';
+      statsCard.className = 'card';
+      statsCard.style.cssText = 'max-width:520px;width:100%;padding:20px;margin-top:20px;text-align:left;';
+      root.appendChild(statsCard);
+    }
 
-  return { init, setActiveTask, clearActiveTask, getActiveTask, getActiveTaskId };
+    const history = Storage.getFocusHistory ? Storage.getFocusHistory() : [];
+    const todayStr = Utils.getTodayStr();
+    const todaySessions = history.filter(h => h.timestamp && h.timestamp.startsWith(todayStr));
+    const todayMins = todaySessions.reduce((sum, s) => sum + (s.durationMinutes || 0), 0);
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const weeklySessions = history.filter(h => h.timestamp && new Date(h.timestamp) >= sevenDaysAgo);
+    const weeklyMins = weeklySessions.reduce((sum, s) => sum + (s.durationMinutes || 0), 0);
+
+    statsCard.innerHTML = `
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <span>Focus Session Log & Audit</span>
+        <span style="font-size:11px;font-weight:600;color:var(--accent);">${history.length} Total Sessions</span>
+      </h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div style="background:var(--bg-input);padding:10px;border-radius:var(--radius-sm);text-align:center;">
+          <div style="font-size:11px;color:var(--text-secondary);font-weight:600;">TODAY'S FOCUS</div>
+          <div style="font-size:18px;font-weight:800;color:var(--accent);">${todayMins}m (${todaySessions.length} sessions)</div>
+        </div>
+        <div style="background:var(--bg-input);padding:10px;border-radius:var(--radius-sm);text-align:center;">
+          <div style="font-size:11px;color:var(--text-secondary);font-weight:600;">LAST 7 DAYS</div>
+          <div style="font-size:18px;font-weight:800;color:var(--success);">${Math.round(weeklyMins / 60 * 10) / 10}h (${weeklySessions.length} sessions)</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);">
+        ${todaySessions.length === 0 ? 'No completed sessions logged today yet. Start a focus session above!' : `
+          <div style="font-weight:600;margin-bottom:6px;">Today's Logged Sessions:</div>
+          <div style="display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto;">
+            ${todaySessions.slice(-4).reverse().map(s => `
+              <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-card);border-radius:var(--radius-sm);border:1px solid var(--border-color);">
+                <span>${Utils.escapeHTML(s.taskTitle || s.subject)}</span>
+                <span style="font-weight:700;color:var(--accent);">${s.durationMinutes} min</span>
+              </div>
+            `).join('')}
+          </div>
+        `}
+      </div>
+    `;
+  }
+
+  function getActiveTaskId() { return activeTaskId; }
+  function getTimerState() { return { isRunning, isPaused, isFocus, timeLeft, totalMinutes, focusMinutes }; }
+
+  return {
+    init,
+    startTimer,
+    pauseTimer,
+    resumeTimer,
+    resetTimer,
+    adjustValue,
+    setActiveTask,
+    clearActiveTask,
+    getActiveTask,
+    getActiveTaskId,
+    getTimerState,
+    renderFocusStats
+  };
 })();

@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="StudyFlow — A vanilla JavaScript student productivity suite with task management, Pomodoro timer, calendar, and auto-scheduling.">
+  <meta name="description" content="StudyFlow — AI-Powered Academic Intelligence & Productivity Suite with predictive modeling, conflict-aware scheduling, voice assistant, and local document intelligence.">
   <meta name="theme-color" content="#0c0d14">
-  <title>StudyFlow — Smart Student Productivity Suite</title>
+  <title>StudyFlow — AI-Powered Academic Intelligence & Productivity Suite</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236366f1'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='white'%3E%E2%98%85%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -56,11 +56,33 @@
           </span>
           <span class="nav-label">Planner</span>
         </a>
+        <a href="#" class="nav-item" data-page="analytics">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </span>
+          <span class="nav-label">Analytics & AI</span>
+        </a>
+        <a href="#" class="nav-item" data-page="timetable">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h4v4H8z"/></svg>
+          </span>
+          <span class="nav-label">Timetable & Rev</span>
+        </a>
+        <a href="#" class="nav-item" data-page="documents">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="13" y2="11"/></svg>
+          </span>
+          <span class="nav-label">Documents</span>
+        </a>
       </nav>
       <div class="sidebar-footer">
         <button id="profileEditBtn" title="Student Profile">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span id="sidebarStudentName">Student Profile</span>
+        </button>
+        <button id="backupRestoreBtn" title="Data Backup and Recovery">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Backup & Restore
         </button>
         <button id="notifSettingsBtn" aria-label="Notification settings">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -75,9 +97,15 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <div class="top-bar-search">
-          <input type="text" id="globalSearch" placeholder="Search tasks..." />
+          <input type="text" id="globalSearch" placeholder="Search tasks, subjects, notes..." />
         </div>
-        <div class="top-bar-right" style="display:flex;align-items:center;gap:12px;">
+        <div class="top-bar-right" style="display:flex;align-items:center;gap:10px;">
+          <!-- Voice Assistant Trigger Button -->
+          <button id="voiceAssistantBtn" class="btn btn-secondary btn-sm" title="Activate Voice Assistant (Press 'V')" aria-label="Voice Assistant" style="padding:6px 12px;display:flex;align-items:center;gap:6px;border-color:var(--accent);color:var(--accent);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            <span style="font-size:12px;font-weight:700;">Voice (V)</span>
+          </button>
+
           <button id="themeToggleBtn" class="btn btn-secondary btn-sm" title="Toggle Light/Dark Theme" aria-label="Toggle Theme" style="padding:6px 12px;display:flex;align-items:center;gap:6px;">
             <svg id="themeIconSun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <svg id="themeIconMoon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -94,7 +122,7 @@
         <div id="pomodoroRoot" style="display:flex;flex-direction:column;align-items:center;min-height:60vh;">
           <div class="card" style="max-width:520px;width:100%;padding:32px;text-align:center;">
             <h2 style="font-size:24px;font-weight:800;margin-bottom:4px;">Study Session Timer</h2>
-            <p style="color:var(--text-secondary);font-size:14px;margin-bottom:20px;">Focus cycles with breaks</p>
+            <p style="color:var(--text-secondary);font-size:14px;margin-bottom:20px;">Timestamp-based focus cycles with state persistence</p>
             <div id="pomodoroTaskInfo" style="display:none;margin-bottom:16px;padding:10px 14px;background:var(--accent-light);border-radius:var(--radius-md);text-align:center;">
               <div id="pomodoroTaskTitle" style="font-size:13px;font-weight:700;color:var(--accent);"></div>
               <div id="pomodoroTaskProgress" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></div>
@@ -111,7 +139,7 @@
               <div><label style="font-size:11px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:2px;">FOCUS</label>
                 <div style="display:flex;align-items:center;gap:4px;">
                   <button class="btn btn-icon btn-secondary" id="pFocusDec" style="width:30px;height:30px;padding:0;font-size:16px;font-weight:700;">-</button>
-                  <input type="text" id="pFocus" value="20" style="width:50px;padding:4px;text-align:center;font-size:15px;font-weight:700;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text-primary);font-family:inherit;outline:none;">
+                  <input type="text" id="pFocus" value="25" style="width:50px;padding:4px;text-align:center;font-size:15px;font-weight:700;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:var(--bg-input);color:var(--text-primary);font-family:inherit;outline:none;">
                   <button class="btn btn-icon btn-secondary" id="pFocusInc" style="width:30px;height:30px;padding:0;font-size:16px;font-weight:700;">+</button>
                 </div>
               </div>
@@ -132,7 +160,7 @@
                 <circle id="pomodoroRingProgress" cx="120" cy="120" r="100" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" transform="rotate(-90,120,120)" style="transition:stroke-dashoffset .5s"/>
               </svg>
               <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-                <span id="pomodoroDisplay" style="font-size:44px;font-weight:800;color:var(--text-primary);letter-spacing:2px;font-variant-numeric:tabular-nums;">20:00</span>
+                <span id="pomodoroDisplay" style="font-size:44px;font-weight:800;color:var(--text-primary);letter-spacing:2px;font-variant-numeric:tabular-nums;">25:00</span>
                 <span id="pomodoroPhase" style="font-size:13px;font-weight:600;color:var(--accent);margin-top:2px;">Ready</span>
                 <span id="pomodoroStatus" style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Cycle 0 &middot; 60 min left</span>
               </div>
@@ -155,17 +183,33 @@
         </div>
       </section>
       <section class="page" id="page-planner"></section>
+      <section class="page" id="page-analytics"></section>
+      <section class="page" id="page-timetable"></section>
+      <section class="page" id="page-documents"></section>
     </main>
   </div>
 
+  <!-- Core Utilities & Pretrained Models Data -->
   <script src="js/utils.js"></script>
+  <script src="js/mlModelsData.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/notifications.js"></script>
+  <script src="js/backupService.js"></script>
+  <script src="js/timetable.js"></script>
+
+  <!-- Bilingual Voice Subsystem -->
+  <script src="js/voiceSpeech.js"></script>
+  <script src="js/voiceParser.js"></script>
+  <script src="js/voiceHandler.js"></script>
+
+  <!-- Application Modules -->
   <script src="js/taskManager.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/calendar.js"></script>
   <script src="js/pomodoro.js"></script>
   <script src="js/studyPlanner.js"></script>
+  <script src="js/mlAnalytics.js"></script>
+  <script src="js/documentIntelligence.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,65 @@
+{
+  "dataset_size": 3500,
+  "train_samples": 2800,
+  "test_samples": 700,
+  "features": [
+    "subject_difficulty",
+    "priority_code",
+    "estimated_duration",
+    "days_until_due",
+    "subtask_count",
+    "student_study_streak",
+    "hist_completion_rate",
+    "past_studied_minutes",
+    "class_hours_today"
+  ],
+  "classification_metrics": {
+    "LogisticRegression": {
+      "accuracy": 0.6929,
+      "precision": 0.6929,
+      "recall": 1.0,
+      "f1_score": 0.8186,
+      "roc_auc": 0.5804,
+      "confusion_matrix": [
+        [
+          0,
+          215
+        ],
+        [
+          0,
+          485
+        ]
+      ]
+    },
+    "RandomForestClassifier": {
+      "accuracy": 0.6943,
+      "precision": 0.6938,
+      "recall": 1.0,
+      "f1_score": 0.8193,
+      "roc_auc": 0.58
+    }
+  },
+  "regression_metrics": {
+    "RidgeRegression": {
+      "rmse": 20.7,
+      "mae": 14.15,
+      "r2_score": 0.9377
+    },
+    "GradientBoostingRegressor": {
+      "rmse": 21.71,
+      "mae": 14.26,
+      "r2_score": 0.9315
+    }
+  },
+  "feature_importance_rf": {
+    "subject_difficulty": 0.0956,
+    "priority_code": 0.0381,
+    "estimated_duration": 0.0727,
+    "days_until_due": 0.1185,
+    "subtask_count": 0.0677,
+    "student_study_streak": 0.0957,
+    "hist_completion_rate": 0.2908,
+    "past_studied_minutes": 0.1537,
+    "class_hours_today": 0.0671
+  }
+}

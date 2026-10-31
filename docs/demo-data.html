@@ -128,9 +128,68 @@ function seed() {
 
   localStorage.clear();
 
+  // Seed focus history for 7-day analytics chart
+  const focusHistory = [
+    { id: 'f01', taskTitle: 'CS301 — Final Project Report', subject: 'Computer Science', durationMinutes: 50, timestamp: iso(0, 8, 50) },
+    { id: 'f02', taskTitle: 'CS301 — Final Project Report', subject: 'Computer Science', durationMinutes: 50, timestamp: iso(0, 9, 50) },
+    { id: 'f03', taskTitle: 'MTH302 — Problem Set 7', subject: 'Mathematics', durationMinutes: 40, timestamp: iso(0, 11, 40) },
+    { id: 'f04', taskTitle: 'PHY201 — Lab Report', subject: 'Physics', durationMinutes: 50, timestamp: iso(-1, 14, 0) },
+    { id: 'f05', taskTitle: 'CS301 — Algorithm Study', subject: 'Computer Science', durationMinutes: 60, timestamp: iso(-2, 10, 0) },
+    { id: 'f06', taskTitle: 'MTH302 — Quiz Preparation', subject: 'Mathematics', durationMinutes: 50, timestamp: iso(-3, 16, 0) },
+    { id: 'f07', taskTitle: 'Operating Systems — Virtual Memory', subject: 'Operating Systems', durationMinutes: 45, timestamp: iso(-4, 9, 0) }
+  ];
+
+  // Seed sample academic timetable
+  const timetable = [
+    { id: 'tt_1', day: 'Monday', startTime: '09:00', endTime: '10:30', subject: 'DSA', room: 'Hall A', type: 'Lecture' },
+    { id: 'tt_2', day: 'Monday', startTime: '11:00', endTime: '12:30', subject: 'Operating Systems', room: 'Lab 2', type: 'Lab' },
+    { id: 'tt_3', day: 'Tuesday', startTime: '10:00', endTime: '11:30', subject: 'DBMS', room: 'Hall B', type: 'Lecture' },
+    { id: 'tt_4', day: 'Wednesday', startTime: '09:00', endTime: '10:30', subject: 'Computer Networks', room: 'Hall C', type: 'Lecture' },
+    { id: 'tt_5', day: 'Wednesday', startTime: '14:00', endTime: '16:00', subject: 'DSA', room: 'Lab 1', type: 'Lab' },
+    { id: 'tt_6', day: 'Thursday', startTime: '11:00', endTime: '12:30', subject: 'Web Development', room: 'Lab 3', type: 'Lecture' },
+    { id: 'tt_7', day: 'Friday', startTime: '10:00', endTime: '11:30', subject: 'Operating Systems', room: 'Hall A', type: 'Lecture' }
+  ];
+
+  // Seed sample syllabus topics
+  const syllabusTopics = [
+    { id: 'top_1', subject: 'DSA', topic: 'Dynamic Programming & 0/1 Knapsack', status: 'Mastered', confidence: 90, lastRevised: d(-4), nextRevisionDate: d(5), intervalIndex: 3 },
+    { id: 'top_2', subject: 'DSA', topic: 'Graph Shortest Paths (Dijkstra)', status: 'In Review', confidence: 75, lastRevised: d(-2), nextRevisionDate: d(2), intervalIndex: 2 },
+    { id: 'top_3', subject: 'Operating Systems', topic: 'Virtual Memory & Page Replacement', status: 'Needs Practice', confidence: 55, lastRevised: d(-5), nextRevisionDate: d(0), intervalIndex: 1 },
+    { id: 'top_4', subject: 'DBMS', topic: 'Normalization & BCNF', status: 'Mastered', confidence: 85, lastRevised: d(-3), nextRevisionDate: d(6), intervalIndex: 3 }
+  ];
+
+  // Seed sample indexed document
+  const documents = [
+    {
+      id: 'doc_demo_1',
+      name: 'OS Unit 3: Virtual Memory & Paging Notes',
+      uploadDate: d(0),
+      chunks: [
+        {
+          id: 'doc_demo_1_chunk_0',
+          docId: 'doc_demo_1',
+          docName: 'OS Unit 3: Virtual Memory & Paging Notes',
+          text: 'Virtual memory is a memory management technique that provides an idealized abstraction of the storage resources that are actually available on a given machine. It allows the execution of processes that may not be completely in memory.',
+          wordCount: 38
+        },
+        {
+          id: 'doc_demo_1_chunk_1',
+          docId: 'doc_demo_1',
+          docName: 'OS Unit 3: Virtual Memory & Paging Notes',
+          text: 'Page replacement algorithms are fundamental to operating systems performance. LRU (Least Recently Used) replaces the page that has not been used for the longest period of time. FIFO (First In First Out) replaces the oldest page regardless of recent access.',
+          wordCount: 42
+        }
+      ]
+    }
+  ];
+
   localStorage.setItem('studyflow_tasks', JSON.stringify(tasks));
   localStorage.setItem('studyflow_planner_schedule', JSON.stringify({ sessions, generatedAt: new Date().toISOString() }));
   localStorage.setItem('studyflow_planner_completed_dates', JSON.stringify(completedDates));
+  localStorage.setItem('studyflow_focus_history', JSON.stringify(focusHistory));
+  localStorage.setItem('studyflow_timetable', JSON.stringify(timetable));
+  localStorage.setItem('studyflow_syllabus_topics', JSON.stringify(syllabusTopics));
+  localStorage.setItem('studyflow_documents', JSON.stringify(documents));
   localStorage.setItem('studyflow_notif_settings', JSON.stringify({ deadlineReminders: true, studySessionReminders: true, pomodoroNotifications: true, dailyMotivation: true, dailySummary: false, reminderTiming: 15 }));
   localStorage.setItem('studyflow_notif_permission', 'granted');
   localStorage.setItem('studyflow_pomodoro_settings', JSON.stringify({ totalMinutes: 60, focusMinutes: 25, breakMinutes: 5 }));
@@ -140,11 +199,14 @@ function seed() {
     '<div class="details">' +
     'Tasks: ' + tasks.length + '\n' +
     'Planner sessions: ' + sessions.length + '\n' +
-    'Completed sessions: ' + sessions.filter(s => s.completed).length + '\n' +
+    'Focus sessions: ' + focusHistory.length + '\n' +
+    'Timetable classes: ' + timetable.length + '\n' +
+    'Syllabus topics: ' + syllabusTopics.length + '\n' +
+    'Documents indexed: ' + documents.length + '\n' +
     'Study streak days: ' + completedDates.length + '\n\n' +
     'Next steps:\n' +
     '1. Open StudyFlow/index.html in your browser\n' +
-    '2. Navigate through each page for screenshots\n' +
+    '2. Test Analytics, Timetable, Documents, and Voice Assistant\n' +
     '3. To reset, clear localStorage via DevTools → Application → Clear Storage' +
     '</div>';
 
